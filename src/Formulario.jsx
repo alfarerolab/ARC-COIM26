@@ -1,35 +1,61 @@
 import { useState } from 'react';
 import { api } from './api.js';
+import logoArmada from './images/image.png';
+import FirmaCanvas from './FirmaCanvas.jsx';
 
 const vacio = (f) => ({
   ...Object.fromEntries(f.campos.map((c) => [c.k, ''])),
   calif: {},
   si: {},
   filas: Array.from({ length: f.tabla?.filas || 0 }, () => ({})),
+  firmaEncuestado: '',
 });
 
 export default function Formulario({ tipo, f, datos, soloLectura, onGuardado }) {
   const [d, setD] = useState(datos || vacio(f));
-  const [msg, setMsg] = useState('');
+  const [notificacion, setNotificacion] = useState(null);
   const [enviando, setEnviando] = useState(false);
+  const [modalFirmaFila, setModalFirmaFila] = useState(null);
+  const [firmaTemp, setFirmaTemp] = useState('');
 
   const set = (k, v) => setD((x) => ({ ...x, [k]: v }));
   const setFila = (i, k, v) =>
     setD((x) => ({ ...x, filas: x.filas.map((r, j) => (j === i ? { ...r, [k]: v } : r)) }));
   const setSi = (i, parte) => setD((x) => ({ ...x, si: { ...x.si, [i]: { ...x.si[i], ...parte } } }));
 
+  const abrirModalFirma = (i) => {
+    setFirmaTemp(d.filas[i]?.firma || '');
+    setModalFirmaFila(i);
+  };
+
+  const guardarFirmaModal = () => {
+    if (modalFirmaFila !== null) {
+      setFila(modalFirmaFila, 'firma', firmaTemp);
+      setModalFirmaFila(null);
+    }
+  };
+
   async function guardar(e) {
     e.preventDefault();
     setEnviando(true);
-    setMsg('');
+    setNotificacion(null);
     try {
       await api.crear(tipo, d);
       setD(vacio(f));
-      setMsg('Registro guardado.');
+      setNotificacion({
+        tipo: 'exito',
+        titulo: '¡Registro guardado con éxito!',
+        mensaje: 'El formulario se ha reiniciado automáticamente y está listo para diligenciar el siguiente.',
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       onGuardado?.();
+      setTimeout(() => setNotificacion(null), 5000);
     } catch (err) {
-      if (err.message === '401') return onGuardado?.('401');
-      setMsg(`No se pudo guardar: ${err.message}`);
+      setNotificacion({
+        tipo: 'error',
+        titulo: 'No se pudo guardar el registro',
+        mensaje: err.message,
+      });
     } finally {
       setEnviando(false);
     }
@@ -37,10 +63,30 @@ export default function Formulario({ tipo, f, datos, soloLectura, onGuardado }) 
 
   return (
     <form className="hoja" onSubmit={guardar}>
+      {notificacion && (
+        <div className={`toast-banner toast-${notificacion.tipo} no-print`} role="alert">
+          <span className="toast-icon">{notificacion.tipo === 'exito' ? '✅' : '⚠️'}</span>
+          <div className="toast-text">
+            <strong>{notificacion.titulo}</strong>
+            <p>{notificacion.mensaje}</p>
+          </div>
+          <button
+            type="button"
+            className="toast-close-btn"
+            onClick={() => setNotificacion(null)}
+            title="Cerrar notificación"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       <table className="membrete">
         <tbody>
           <tr>
-            <td rowSpan="2" className="escudo">ARMADA<br />DE COLOMBIA</td>
+            <td rowSpan="2" className="escudo">
+              <img src={logoArmada} alt="Armada de Colombia" className="escudo-img" />
+            </td>
             <td colSpan="3" className="titulo">
               {f.titulo}
               {f.subtitulo && <small>{f.subtitulo}</small>}
@@ -113,18 +159,34 @@ export default function Formulario({ tipo, f, datos, soloLectura, onGuardado }) 
             <h3>{f.siNoTitulo}</h3>
             <p className="ayuda">{f.siNoAyuda}</p>
             {f.siNo.map((q, i) => (
-              <div className="sino" key={i}>
-                <p>{q}</p>
+              <div key={i} className="sino">
+                <p>{i + 1}. {q}</p>
                 <div className="sino-resp">
-                  {['Sí', 'No'].map((o) => (
-                    <label key={o} className="inline">
-                      <input type="radio" name={`s${i}`} checked={d.si[i]?.resp === o}
-                        onChange={() => setSi(i, { resp: o })} /> {o}
-                    </label>
-                  ))}
-                  {d.si[i]?.resp === 'Sí' && (
-                    <input className="cual" placeholder="¿Cuál?" value={d.si[i]?.detalle || ''}
-                      onChange={(e) => setSi(i, { detalle: e.target.value })} />
+                  <label className="inline">
+                    <input
+                      type="radio"
+                      name={`si${i}`}
+                      checked={d.si[i]?.resp === 'SI'}
+                      onChange={() => setSi(i, { resp: 'SI' })}
+                    />
+                    Sí
+                  </label>
+                  <label className="inline">
+                    <input
+                      type="radio"
+                      name={`si${i}`}
+                      checked={d.si[i]?.resp === 'NO'}
+                      onChange={() => setSi(i, { resp: 'NO' })}
+                    />
+                    No
+                  </label>
+                  {d.si[i]?.resp === 'SI' && (
+                    <input
+                      className="cual"
+                      placeholder="Justifique su respuesta…"
+                      value={d.si[i]?.detalle || ''}
+                      onChange={(e) => setSi(i, { detalle: e.target.value })}
+                    />
                   )}
                 </div>
               </div>
@@ -146,20 +208,77 @@ export default function Formulario({ tipo, f, datos, soloLectura, onGuardado }) 
                   {d.filas.map((fila, i) => (
                     <tr key={i}>
                       <td className="centro">{i + 1}</td>
-                      {f.tabla.cols.map((c) => (
-                        <td key={c.k}>
-                          <input aria-label={`${c.label} fila ${i + 1}`} value={fila[c.k] || ''}
-                            onChange={(e) => setFila(i, c.k, e.target.value)} />
-                        </td>
-                      ))}
+                      {f.tabla.cols.map((c) => {
+                        // Firma táctil exclusiva para el Listado de Asistencia
+                        if (tipo === 'asistencia' && c.k === 'firma') {
+                          if (soloLectura) {
+                            return (
+                              <td key={c.k} className="centro celda-firma">
+                                {fila.firma ? (
+                                  <img src={fila.firma} alt="Firma" className="firma-tabla-img" />
+                                ) : (
+                                  <span className="sin-firma">—</span>
+                                )}
+                              </td>
+                            );
+                          }
+                          return (
+                            <td key={c.k} className="centro celda-firma">
+                              {fila.firma ? (
+                                <div className="firma-miniatura-wrap">
+                                  <img src={fila.firma} alt="Firma" className="firma-miniatura" />
+                                  <button
+                                    type="button"
+                                    className="btn-cambiar-firma no-print"
+                                    onClick={() => abrirModalFirma(i)}
+                                    title="Modificar firma"
+                                  >
+                                    ✍️
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="btn-borrar-firma no-print"
+                                    onClick={() => setFila(i, 'firma', '')}
+                                    title="Borrar firma"
+                                  >
+                                    ✕
+                                  </button>
+                                </div>
+                              ) : (
+                                <button
+                                  type="button"
+                                  className="btn-abrir-firma no-print"
+                                  onClick={() => abrirModalFirma(i)}
+                                >
+                                  ✍️ Firmar
+                                </button>
+                              )}
+                            </td>
+                          );
+                        }
+
+                        // Columna estándar (texto)
+                        return (
+                          <td key={c.k}>
+                            <input
+                              aria-label={`${c.label} fila ${i + 1}`}
+                              value={fila[c.k] || ''}
+                              onChange={(e) => setFila(i, c.k, e.target.value)}
+                            />
+                          </td>
+                        );
+                      })}
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
             {!soloLectura && (
-              <button type="button" className="sec no-print"
-                onClick={() => set('filas', [...d.filas, {}])}>
+              <button
+                type="button"
+                className="sec no-print"
+                onClick={() => set('filas', [...d.filas, {}])}
+              >
                 Agregar fila
               </button>
             )}
@@ -168,16 +287,98 @@ export default function Formulario({ tipo, f, datos, soloLectura, onGuardado }) 
         )}
       </fieldset>
 
+      {/* Firmas institucionales */}
       {f.firmas && (
         <div className="firmas">
-          {f.firmas.map((x) => <div key={x}><span /> {x}</div>)}
+          {f.firmas.map((x) => {
+            // Firma táctil exclusiva para el encuestado en la Encuesta de satisfacción
+            const esFirmaTactilEncuestado = tipo === 'encuesta' && x.toLowerCase().includes('encuestado');
+
+            if (esFirmaTactilEncuestado) {
+              return (
+                <div key={x} className="firma-bloque-item">
+                  {!soloLectura ? (
+                    <div className="firma-editor-wrap no-print">
+                      <label className="firma-box-title">✍️ Firma digital del encuestado (dibuje con su dedo):</label>
+                      <FirmaCanvas
+                        ancho={280}
+                        alto={120}
+                        valorInicial={d.firmaEncuestado}
+                        onChange={(v) => set('firmaEncuestado', v)}
+                        placeholder="Firme con su dedo aquí"
+                      />
+                    </div>
+                  ) : null}
+
+                  {/* Renderizado de la firma para impresión o visualización */}
+                  <div className="firma-preview-espacio">
+                    {d.firmaEncuestado ? (
+                      <img src={d.firmaEncuestado} alt="Firma encuestado" className="firma-render-img" />
+                    ) : (
+                      <div className="firma-espacio-blanco" />
+                    )}
+                  </div>
+                  <span className="firma-linea-separador" />
+                  <span className="firma-texto-label">{x}</span>
+                </div>
+              );
+            }
+
+            // Firma física tradicional (para suboficial, y para caracterización)
+            return (
+              <div key={x} className="firma-bloque-item">
+                <div className="firma-preview-espacio">
+                  <div className="firma-espacio-blanco" />
+                </div>
+                <span className="firma-linea-separador" />
+                <span className="firma-texto-label">{x}</span>
+              </div>
+            );
+          })}
         </div>
       )}
 
       {!soloLectura && (
         <div className="acciones no-print">
-          <button disabled={enviando}>{enviando ? 'Guardando…' : 'Guardar registro'}</button>
-          {msg && <span role="status">{msg}</span>}
+          <button type="submit" className="btn-guardar-principal" disabled={enviando}>
+            {enviando ? 'Guardando registro…' : '💾 Guardar registro y continuar'}
+          </button>
+        </div>
+      )}
+
+      {/* Modal táctil de firma para Asistente */}
+      {modalFirmaFila !== null && (
+        <div className="modal-overlay" onClick={() => setModalFirmaFila(null)}>
+          <div className="modal-card modal-firma-card" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>✍️ Firma del Asistente</h3>
+              <button type="button" className="modal-close" onClick={() => setModalFirmaFila(null)}>
+                ✕
+              </button>
+            </div>
+            <p className="modal-desc">
+              {d.filas[modalFirmaFila]?.nombre
+                ? `Asistente: ${d.filas[modalFirmaFila].nombre}`
+                : `Fila #${modalFirmaFila + 1}`}
+            </p>
+            <div className="modal-firma-canvas-container">
+              <FirmaCanvas
+                ancho={320}
+                alto={150}
+                valorInicial={firmaTemp}
+                onChange={(v) => setFirmaTemp(v)}
+                placeholder="Firme con su dedo aquí"
+              />
+            </div>
+            <div className="modal-actions">
+              <button type="button" className="sec" onClick={() => setModalFirmaFila(null)}>
+                Cancelar
+              </button>
+              <button type="button" onClick={guardarFirmaModal}>
+                Guardar Firma
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </form>

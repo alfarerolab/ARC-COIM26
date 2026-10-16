@@ -8,7 +8,7 @@ export const FORMATOS = {
     proceso: 'Acción Integral',
     autoridad: 'JACID',
     codigo: 'ACCIN-FT-022-JACID-V02',
-    vigencia: '12/06/2025',
+    vigencia: '28/11/2026',
     resumen: 'encuestado',
     campos: [
       { k: 'fecha', label: 'Fecha', type: 'date' },
@@ -52,7 +52,7 @@ export const FORMATOS = {
     proceso: 'Documento Institucional',
     autoridad: 'JPLAN',
     codigo: 'ARC-FT-002-JPLAN-V07',
-    vigencia: '26/04/2021',
+    vigencia: '28/11/2026',
     resumen: 'objetivo',
     campos: [
       { k: 'objetivo', label: 'Objetivo', span: 2 },
@@ -83,7 +83,7 @@ export const FORMATOS = {
     proceso: 'Acción Integral',
     autoridad: 'JACID',
     codigo: 'ACCIN-FT-005-JACID-V04',
-    vigencia: '05/01/2024',
+    vigencia: '28/11/2026',
     resumen: 'comunidad',
     campos: [
       { k: 'comunidad', label: 'Comunidad' },

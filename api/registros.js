@@ -1,14 +1,15 @@
 import { neon } from '@neondatabase/serverless';
 
-const sql = neon(process.env.DATABASE_URL);
 const TIPOS = ['encuesta', 'asistencia', 'caracterizacion'];
 
 export default async function handler(req, res) {
-  const clave = process.env.APP_CLAVE;
-  if (clave && req.headers['x-clave'] !== clave) {
-    return res.status(401).json({ error: 'Clave incorrecta' });
+  if (!process.env.DATABASE_URL) {
+    return res.status(500).json({
+      error: 'DATABASE_URL no está configurada en el entorno (Neon PostgreSQL).'
+    });
   }
 
+  const sql = neon(process.env.DATABASE_URL);
   try {
     await sql`CREATE TABLE IF NOT EXISTS registros (
       id SERIAL PRIMARY KEY,
@@ -19,9 +20,12 @@ export default async function handler(req, res) {
 
     if (req.method === 'GET') {
       const { tipo } = req.query;
-      if (!TIPOS.includes(tipo)) return res.status(400).json({ error: 'Tipo no válido' });
-      const rows = await sql`SELECT id, tipo, datos, creado FROM registros
-                             WHERE tipo = ${tipo} ORDER BY creado DESC LIMIT 500`;
+      if (tipo && tipo !== 'todos' && !TIPOS.includes(tipo)) {
+        return res.status(400).json({ error: 'Tipo no válido' });
+      }
+      const rows = (!tipo || tipo === 'todos')
+        ? await sql`SELECT id, tipo, datos, creado FROM registros ORDER BY creado DESC LIMIT 1000`
+        : await sql`SELECT id, tipo, datos, creado FROM registros WHERE tipo = ${tipo} ORDER BY creado DESC LIMIT 500`;
       return res.status(200).json(rows);
     }
 
