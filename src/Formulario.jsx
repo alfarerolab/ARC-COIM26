@@ -4,36 +4,20 @@ import logoArmada from './images/image.png';
 import FirmaCanvas from './FirmaCanvas.jsx';
 
 const vacio = (f) => ({
-  ...Object.fromEntries(f.campos.map((c) => [c.k, ''])),
+  ...Object.fromEntries(f.campos?.map((c) => [c.k, '']) || []),
   calif: {},
   si: {},
-  filas: Array.from({ length: f.tabla?.filas || 0 }, () => ({})),
   firmaEncuestado: '',
+  firma: '',
 });
 
 export default function Formulario({ tipo, f, datos, soloLectura, onGuardado }) {
   const [d, setD] = useState(datos || vacio(f));
   const [notificacion, setNotificacion] = useState(null);
   const [enviando, setEnviando] = useState(false);
-  const [modalFirmaFila, setModalFirmaFila] = useState(null);
-  const [firmaTemp, setFirmaTemp] = useState('');
 
   const set = (k, v) => setD((x) => ({ ...x, [k]: v }));
-  const setFila = (i, k, v) =>
-    setD((x) => ({ ...x, filas: x.filas.map((r, j) => (j === i ? { ...r, [k]: v } : r)) }));
   const setSi = (i, parte) => setD((x) => ({ ...x, si: { ...x.si, [i]: { ...x.si[i], ...parte } } }));
-
-  const abrirModalFirma = (i) => {
-    setFirmaTemp(d.filas[i]?.firma || '');
-    setModalFirmaFila(i);
-  };
-
-  const guardarFirmaModal = () => {
-    if (modalFirmaFila !== null) {
-      setFila(modalFirmaFila, 'firma', firmaTemp);
-      setModalFirmaFila(null);
-    }
-  };
 
   async function guardar(e) {
     e.preventDefault();
@@ -81,6 +65,7 @@ export default function Formulario({ tipo, f, datos, soloLectura, onGuardado }) 
         </div>
       )}
 
+      {/* Membrete Institucional Oficial de la Armada */}
       <table className="membrete">
         <tbody>
           <tr>
@@ -100,25 +85,104 @@ export default function Formulario({ tipo, f, datos, soloLectura, onGuardado }) 
         </tbody>
       </table>
 
-      <fieldset disabled={soloLectura}>
-        <div className="campos">
-          {f.campos.map((c) => (
-            <label key={c.k} className={c.span === 2 ? 'ancho' : ''}>
-              {c.label}
-              {c.type === 'select' ? (
-                <select value={d[c.k]} onChange={(e) => set(c.k, e.target.value)}>
-                  <option value="">Seleccione…</option>
-                  {c.options.map((o) => <option key={o}>{o}</option>)}
-                </select>
-              ) : (
-                <input type={c.type || 'text'} value={d[c.k]} onChange={(e) => set(c.k, e.target.value)} />
-              )}
-            </label>
-          ))}
-        </div>
+      <fieldset disabled={soloLectura} className="formulario-fieldset">
+        {/* Renderizado por Secciones (Asistencia y Caracterización) */}
+        {f.secciones ? (
+          f.secciones.map((sec, sIdx) => (
+            <div key={sIdx} className="formulario-seccion-card">
+              <div className="formulario-seccion-header">
+                <h3 className="formulario-seccion-titulo">{sec.titulo}</h3>
+                {sec.descripcion && <p className="formulario-seccion-desc">{sec.descripcion}</p>}
+              </div>
+              <div className="campos">
+                {sec.campos.map((c) => (
+                  <label key={c.k} className={c.span === 2 ? 'ancho' : ''}>
+                    {c.label}
+                    {c.type === 'select' ? (
+                      <select value={d[c.k] || ''} onChange={(e) => set(c.k, e.target.value)}>
+                        <option value="">Seleccione…</option>
+                        {c.options.map((o) => (
+                          <option key={o} value={o}>{o}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        type={c.type || 'text'}
+                        placeholder={c.placeholder || ''}
+                        value={d[c.k] || ''}
+                        onChange={(e) => set(c.k, e.target.value)}
+                      />
+                    )}
+                  </label>
+                ))}
+              </div>
+            </div>
+          ))
+        ) : (
+          /* Renderizado tradicional para Encuesta */
+          <div className="campos">
+            {f.campos.map((c) => (
+              <label key={c.k} className={c.span === 2 ? 'ancho' : ''}>
+                {c.label}
+                {c.type === 'select' ? (
+                  <select value={d[c.k] || ''} onChange={(e) => set(c.k, e.target.value)}>
+                    <option value="">Seleccione…</option>
+                    {c.options.map((o) => (
+                      <option key={o} value={o}>{o}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type={c.type || 'text'}
+                    placeholder={c.placeholder || ''}
+                    value={d[c.k] || ''}
+                    onChange={(e) => set(c.k, e.target.value)}
+                  />
+                )}
+              </label>
+            ))}
+          </div>
+        )}
 
+        {/* Firma digital táctil para Asistencia (campo individual directo en el formulario) */}
+        {f.requiereFirmaAsistente && (
+          <div className="formulario-seccion-card">
+            <div className="formulario-seccion-header">
+              <h3 className="formulario-seccion-titulo">Firma Digital del Asistente</h3>
+              <p className="formulario-seccion-desc">
+                Dibuje su firma directamente en el recuadro con su dedo desde su teléfono móvil o puntero.
+              </p>
+            </div>
+            <div className="firma-individual-wrap">
+              {!soloLectura ? (
+                <div className="no-print">
+                  <FirmaCanvas
+                    ancho={340}
+                    alto={140}
+                    valorInicial={d.firma || ''}
+                    onChange={(v) => set('firma', v)}
+                    placeholder="Firme con su dedo aquí"
+                  />
+                </div>
+              ) : null}
+
+              {/* Render de la firma para impresión o visualización en solo lectura */}
+              <div className="firma-preview-espacio">
+                {d.firma ? (
+                  <img src={d.firma} alt="Firma Asistente" className="firma-render-img" />
+                ) : (
+                  <div className="firma-espacio-blanco" />
+                )}
+                <span className="firma-linea-separador" />
+                <span className="firma-texto-label">Firma del Asistente</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Escala de Satisfacción (Exclusiva para Encuesta) */}
         {f.escala && (
-          <section>
+          <section className="seccion-bloque">
             <h3>{f.escalaTitulo}</h3>
             <p className="ayuda">{f.escalaAyuda}</p>
             <div className="tabla-scroll">
@@ -127,7 +191,9 @@ export default function Formulario({ tipo, f, datos, soloLectura, onGuardado }) 
                   <tr>
                     <th>#</th>
                     <th>Consideraciones</th>
-                    {f.niveles.map((n, i) => <th key={n}>{i + 1}<br /><small>{n}</small></th>)}
+                    {f.niveles.map((n, i) => (
+                      <th key={n}>{i + 1}<br /><small>{n}</small></th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
@@ -141,7 +207,7 @@ export default function Formulario({ tipo, f, datos, soloLectura, onGuardado }) 
                             type="radio"
                             name={`c${i}`}
                             aria-label={`Pregunta ${i + 1}: ${n + 1}`}
-                            checked={d.calif[i] === n + 1}
+                            checked={d.calif?.[i] === n + 1}
                             onChange={() => setD((x) => ({ ...x, calif: { ...x.calif, [i]: n + 1 } }))}
                           />
                         </td>
@@ -154,8 +220,9 @@ export default function Formulario({ tipo, f, datos, soloLectura, onGuardado }) 
           </section>
         )}
 
+        {/* Preguntas Sí/No (Exclusivas para Encuesta) */}
         {f.siNo && (
-          <section>
+          <section className="seccion-bloque">
             <h3>{f.siNoTitulo}</h3>
             <p className="ayuda">{f.siNoAyuda}</p>
             {f.siNo.map((q, i) => (
@@ -166,7 +233,7 @@ export default function Formulario({ tipo, f, datos, soloLectura, onGuardado }) 
                     <input
                       type="radio"
                       name={`si${i}`}
-                      checked={d.si[i]?.resp === 'SI'}
+                      checked={d.si?.[i]?.resp === 'SI'}
                       onChange={() => setSi(i, { resp: 'SI' })}
                     />
                     Sí
@@ -175,16 +242,16 @@ export default function Formulario({ tipo, f, datos, soloLectura, onGuardado }) 
                     <input
                       type="radio"
                       name={`si${i}`}
-                      checked={d.si[i]?.resp === 'NO'}
+                      checked={d.si?.[i]?.resp === 'NO'}
                       onChange={() => setSi(i, { resp: 'NO' })}
                     />
                     No
                   </label>
-                  {d.si[i]?.resp === 'SI' && (
+                  {d.si?.[i]?.resp === 'SI' && (
                     <input
                       className="cual"
                       placeholder="Justifique su respuesta…"
-                      value={d.si[i]?.detalle || ''}
+                      value={d.si?.[i]?.detalle || ''}
                       onChange={(e) => setSi(i, { detalle: e.target.value })}
                     />
                   )}
@@ -194,104 +261,14 @@ export default function Formulario({ tipo, f, datos, soloLectura, onGuardado }) 
           </section>
         )}
 
-        {f.tabla && (
-          <section>
-            <div className="tabla-scroll">
-              <table className="rejilla">
-                <thead>
-                  <tr>
-                    <th>No.</th>
-                    {f.tabla.cols.map((c) => <th key={c.k}>{c.label}</th>)}
-                  </tr>
-                </thead>
-                <tbody>
-                  {d.filas.map((fila, i) => (
-                    <tr key={i}>
-                      <td className="centro">{i + 1}</td>
-                      {f.tabla.cols.map((c) => {
-                        // Firma táctil exclusiva para el Listado de Asistencia
-                        if (tipo === 'asistencia' && c.k === 'firma') {
-                          if (soloLectura) {
-                            return (
-                              <td key={c.k} className="centro celda-firma">
-                                {fila.firma ? (
-                                  <img src={fila.firma} alt="Firma" className="firma-tabla-img" />
-                                ) : (
-                                  <span className="sin-firma">—</span>
-                                )}
-                              </td>
-                            );
-                          }
-                          return (
-                            <td key={c.k} className="centro celda-firma">
-                              {fila.firma ? (
-                                <div className="firma-miniatura-wrap">
-                                  <img src={fila.firma} alt="Firma" className="firma-miniatura" />
-                                  <button
-                                    type="button"
-                                    className="btn-cambiar-firma no-print"
-                                    onClick={() => abrirModalFirma(i)}
-                                    title="Modificar firma"
-                                  >
-                                    ✍️
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className="btn-borrar-firma no-print"
-                                    onClick={() => setFila(i, 'firma', '')}
-                                    title="Borrar firma"
-                                  >
-                                    ✕
-                                  </button>
-                                </div>
-                              ) : (
-                                <button
-                                  type="button"
-                                  className="btn-abrir-firma no-print"
-                                  onClick={() => abrirModalFirma(i)}
-                                >
-                                  ✍️ Firmar
-                                </button>
-                              )}
-                            </td>
-                          );
-                        }
-
-                        // Columna estándar (texto)
-                        return (
-                          <td key={c.k}>
-                            <input
-                              aria-label={`${c.label} fila ${i + 1}`}
-                              value={fila[c.k] || ''}
-                              onChange={(e) => setFila(i, c.k, e.target.value)}
-                            />
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            {!soloLectura && (
-              <button
-                type="button"
-                className="sec no-print"
-                onClick={() => set('filas', [...d.filas, {}])}
-              >
-                Agregar fila
-              </button>
-            )}
-            {f.nota && <p className="nota">{f.nota}</p>}
-          </section>
-        )}
+        {/* Nota institucional (para Caracterización) */}
+        {f.nota && <p className="nota">{f.nota}</p>}
       </fieldset>
 
-      {/* Firmas institucionales */}
+      {/* Firmas institucionales (Encuesta y Caracterización) */}
       {f.firmas && (
         <div className="firmas">
           {f.firmas.map((x) => {
-            // Firma táctil exclusiva para el encuestado en la Encuesta de satisfacción
             const esFirmaTactilEncuestado = tipo === 'encuesta' && x.toLowerCase().includes('encuestado');
 
             if (esFirmaTactilEncuestado) {
@@ -310,7 +287,6 @@ export default function Formulario({ tipo, f, datos, soloLectura, onGuardado }) 
                     </div>
                   ) : null}
 
-                  {/* Renderizado de la firma para impresión o visualización */}
                   <div className="firma-preview-espacio">
                     {d.firmaEncuestado ? (
                       <img src={d.firmaEncuestado} alt="Firma encuestado" className="firma-render-img" />
@@ -324,7 +300,6 @@ export default function Formulario({ tipo, f, datos, soloLectura, onGuardado }) 
               );
             }
 
-            // Firma física tradicional (para suboficial, y para caracterización)
             return (
               <div key={x} className="firma-bloque-item">
                 <div className="firma-preview-espacio">
@@ -338,47 +313,12 @@ export default function Formulario({ tipo, f, datos, soloLectura, onGuardado }) 
         </div>
       )}
 
+      {/* Botón de Guardado */}
       {!soloLectura && (
         <div className="acciones no-print">
           <button type="submit" className="btn-guardar-principal" disabled={enviando}>
             {enviando ? 'Guardando registro…' : '💾 Guardar registro y continuar'}
           </button>
-        </div>
-      )}
-
-      {/* Modal táctil de firma para Asistente */}
-      {modalFirmaFila !== null && (
-        <div className="modal-overlay" onClick={() => setModalFirmaFila(null)}>
-          <div className="modal-card modal-firma-card" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>✍️ Firma del Asistente</h3>
-              <button type="button" className="modal-close" onClick={() => setModalFirmaFila(null)}>
-                ✕
-              </button>
-            </div>
-            <p className="modal-desc">
-              {d.filas[modalFirmaFila]?.nombre
-                ? `Asistente: ${d.filas[modalFirmaFila].nombre}`
-                : `Fila #${modalFirmaFila + 1}`}
-            </p>
-            <div className="modal-firma-canvas-container">
-              <FirmaCanvas
-                ancho={320}
-                alto={150}
-                valorInicial={firmaTemp}
-                onChange={(v) => setFirmaTemp(v)}
-                placeholder="Firme con su dedo aquí"
-              />
-            </div>
-            <div className="modal-actions">
-              <button type="button" className="sec" onClick={() => setModalFirmaFila(null)}>
-                Cancelar
-              </button>
-              <button type="button" onClick={guardarFirmaModal}>
-                Guardar Firma
-              </button>
-            </div>
-          </div>
         </div>
       )}
     </form>

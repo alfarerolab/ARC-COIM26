@@ -1,29 +1,120 @@
 import { useState, useEffect, useMemo } from 'react';
 import { FORMATOS } from './formatos.js';
 import Formulario from './Formulario.jsx';
+import PlanillaOficial from './PlanillaOficial.jsx';
 import { api } from './api.js';
 import logoArmada from './images/image.png';
 
-function aCSV(f, regs) {
+function aCSV(f, regs, tipo) {
   const filas = [];
   for (const r of regs) {
-    const d = r.datos;
-    const base = { id: r.id, creado: r.creado, ...Object.fromEntries(f.campos.map((c) => [c.label, d[c.k] || ''])) };
-    if (f.escala) {
-      const o = { ...base };
-      f.escala.forEach((_, i) => (o[`P${i + 1}`] = d.calif?.[i] || ''));
-      f.siNo.forEach((_, i) => {
-        o[`S${i + 1}`] = d.si?.[i]?.resp || '';
-        o[`S${i + 1} detalle`] = d.si?.[i]?.detalle || '';
+    const d = r.datos || {};
+    const base = {
+      ID: r.id,
+      'Fecha Registro': new Date(r.creado).toLocaleString('es-CO'),
+    };
+
+    if (tipo === 'encuesta') {
+      const o = {
+        ...base,
+        Fecha: d.fecha || '',
+        Encuestado: d.encuestado || '',
+        Suboficial: d.suboficial || '',
+        'Firma Encuestado': d.firmaEncuestado ? 'Registrada' : 'Sin firma',
+      };
+      f.escala?.forEach((_, i) => (o[`Pregunta ${i + 1}`] = d.calif?.[i] || ''));
+      f.siNo?.forEach((_, i) => {
+        o[`Oportunidad ${i + 1} Resp`] = d.si?.[i]?.resp || '';
+        o[`Oportunidad ${i + 1} Detalle`] = d.si?.[i]?.detalle || '';
       });
       filas.push(o);
-    } else {
-      (d.filas || []).forEach((fi, n) => {
-        if (!f.tabla.cols.some((c) => fi[c.k])) return;
-        filas.push({ ...base, No: n + 1, ...Object.fromEntries(f.tabla.cols.map((c) => [c.label, fi[c.k] || ''])) });
-      });
+    } else if (tipo === 'asistencia') {
+      if (Array.isArray(d.filas) && d.filas.length > 0) {
+        d.filas.forEach((fi, n) => {
+          if (!fi.nombre && !fi.cedula && !fi.grado) return;
+          filas.push({
+            ...base,
+            No: n + 1,
+            Objetivo: d.objetivo || '',
+            Moderador: d.moderador || '',
+            Guarnición: d.guarnicion || '',
+            Tipo: d.tipo || '',
+            Fecha: d.fecha || '',
+            Hora: d.hora || '',
+            Grado: fi.grado || '',
+            'Apellidos y nombres': fi.nombre || '',
+            Dependencia: fi.dependencia || '',
+            Cédula: fi.cedula || '',
+            Celular: fi.celular || '',
+            Correo: fi.correo || '',
+            Firma: fi.firma ? 'Registrada' : 'Sin firma',
+          });
+        });
+      } else {
+        filas.push({
+          ...base,
+          Objetivo: d.objetivo || '',
+          Moderador: d.moderador || '',
+          Guarnición: d.guarnicion || '',
+          Tipo: d.tipo || '',
+          Fecha: d.fecha || '',
+          Hora: d.hora || '',
+          Grado: d.grado || '',
+          'Apellidos y nombres': d.nombre || '',
+          Dependencia: d.dependencia || '',
+          Cédula: d.cedula || '',
+          Celular: d.celular || '',
+          Correo: d.correo || '',
+          Firma: d.firma ? 'Registrada' : 'Sin firma',
+        });
+      }
+    } else if (tipo === 'caracterizacion') {
+      if (Array.isArray(d.filas) && d.filas.length > 0) {
+        d.filas.forEach((fi, n) => {
+          if (!fi.nombre && !fi.cedula) return;
+          filas.push({
+            ...base,
+            No: n + 1,
+            Comunidad: d.comunidad || '',
+            Municipio: d.municipio || '',
+            Departamento: d.departamento || '',
+            Fechas: d.fechas || '',
+            Unidad: d.unidad || '',
+            Encargado: d.encargado || '',
+            'Nombres y apellidos': fi.nombre || '',
+            Cédula: fi.cedula || '',
+            'Tarjeta profesional': fi.tarjeta || '',
+            Especialidad: fi.especialidad || '',
+            Servicios: fi.servicios || '',
+            Entidad: fi.entidad || '',
+            'G.S.-RH': fi.gsrh || '',
+            EPS: fi.eps || '',
+            Celular: fi.celular || '',
+          });
+        });
+      } else {
+        filas.push({
+          ...base,
+          Comunidad: d.comunidad || '',
+          Municipio: d.municipio || '',
+          Departamento: d.departamento || '',
+          Fechas: d.fechas || '',
+          Unidad: d.unidad || '',
+          Encargado: d.encargado || '',
+          'Nombres y apellidos': d.nombre || '',
+          Cédula: d.cedula || '',
+          'Tarjeta profesional': d.tarjeta || '',
+          Especialidad: d.especialidad || '',
+          Servicios: d.servicios || '',
+          Entidad: d.entidad || '',
+          'G.S.-RH': d.gsrh || '',
+          EPS: d.eps || '',
+          Celular: d.celular || '',
+        });
+      }
     }
   }
+  if (filas.length === 0) return '';
   const cols = [...new Set(filas.flatMap(Object.keys))];
   const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
   return '\uFEFF' + [cols.map(esc).join(','), ...filas.map((o) => cols.map((c) => esc(o[c])).join(','))].join('\n');
@@ -43,6 +134,7 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
   const [filtroTipo, setFiltroTipo] = useState('todos');
   const [busqueda, setBusqueda] = useState('');
   const [registroDetalle, setRegistroDetalle] = useState(null);
+  const [vistaPlanilla, setVistaPlanilla] = useState(null); // 'asistencia' | 'caracterizacion' | null
 
   const cargarRegistros = async () => {
     setCargando(true);
@@ -96,20 +188,28 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
     });
     const promSatisfaccion = totalCalif > 0 ? (sumaCalif / totalCalif).toFixed(1) : null;
 
-    // Total personas en asistencias
+    // Total personas en asistencias (contando tanto individuales como d.filas legacy)
     let totalAsistentes = 0;
     asistencias.forEach((a) => {
-      const filas = a.datos?.filas || [];
-      const conDatos = filas.filter((fi) => fi.nombre || fi.cedula || fi.grado);
-      totalAsistentes += conDatos.length;
+      const d = a.datos || {};
+      if (Array.isArray(d.filas) && d.filas.length > 0) {
+        const conDatos = d.filas.filter((fi) => fi.nombre || fi.cedula || fi.grado);
+        totalAsistentes += conDatos.length;
+      } else if (d.nombre || d.cedula || d.grado) {
+        totalAsistentes += 1;
+      }
     });
 
-    // Total personas caracterizadas
+    // Total personas en caracterizaciones
     let totalPersonasCarac = 0;
     caracterizaciones.forEach((c) => {
-      const filas = c.datos?.filas || [];
-      const conDatos = filas.filter((fi) => fi.nombre || fi.cedula);
-      totalPersonasCarac += conDatos.length;
+      const d = c.datos || {};
+      if (Array.isArray(d.filas) && d.filas.length > 0) {
+        const conDatos = d.filas.filter((fi) => fi.nombre || fi.cedula);
+        totalPersonasCarac += conDatos.length;
+      } else if (d.nombre || d.cedula) {
+        totalPersonasCarac += 1;
+      }
     });
 
     return {
@@ -135,20 +235,26 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
 
       // Búsqueda en campos principales
       const resumen = String(d[f?.resumen] || '').toLowerCase();
-      const fecha = String(d.fecha || '').toLowerCase();
-      const creado = new Date(r.creado).toLocaleString('es-CO').toLowerCase();
+      const nombre = String(d.nombre || '').toLowerCase();
+      const cedula = String(d.cedula || '').toLowerCase();
+      const fecha = String(d.fecha || d.fechas || '').toLowerCase();
+      const objetivo = String(d.objetivo || d.comunidad || '').toLowerCase();
+      const grado = String(d.grado || '').toLowerCase();
       const id = String(r.id);
 
-      if (id.includes(q) || resumen.includes(q) || fecha.includes(q) || creado.includes(q)) return true;
+      if (
+        resumen.includes(q) ||
+        nombre.includes(q) ||
+        cedula.includes(q) ||
+        fecha.includes(q) ||
+        objetivo.includes(q) ||
+        grado.includes(q) ||
+        id.includes(q)
+      ) {
+        return true;
+      }
 
-      // Búsqueda en subcampos (comunidad, municipio, moderador, suboficial, etc.)
-      const textoCampos = Object.values(d)
-        .filter((v) => typeof v === 'string')
-        .join(' ')
-        .toLowerCase();
-      if (textoCampos.includes(q)) return true;
-
-      // Búsqueda en filas de tablas (asistentes, caracterizados)
+      // Búsqueda en filas legacy
       if (Array.isArray(d.filas)) {
         const textoFilas = d.filas
           .map((fi) => Object.values(fi).join(' '))
@@ -165,10 +271,24 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
     const regs = registros.filter((r) => r.tipo === tipo);
     if (regs.length === 0) return alert('No hay registros de este formato para exportar.');
     const f = FORMATOS[tipo];
-    descargarCSV(`${tipo}_consolidado.csv`, aCSV(f, regs));
+    const csvContent = aCSV(f, regs, tipo);
+    if (!csvContent) return alert('No se encontraron filas para exportar.');
+    descargarCSV(`${tipo}_consolidado.csv`, csvContent);
   };
 
-  // Vista de detalle / impresión
+  // Si está abierta la Planilla Oficial Consolidada (Listado con rejilla institucional)
+  if (vistaPlanilla) {
+    const regsTipo = registros.filter((r) => r.tipo === vistaPlanilla);
+    return (
+      <PlanillaOficial
+        tipo={vistaPlanilla}
+        registros={regsTipo}
+        onVolver={() => setVistaPlanilla(null)}
+      />
+    );
+  }
+
+  // Vista de detalle individual / impresión
   if (registroDetalle) {
     const f = FORMATOS[registroDetalle.tipo];
     return (
@@ -196,7 +316,7 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
           <img src={logoArmada} alt="Armada de Colombia" className="admin-logo" />
           <div>
             <h1>Panel de Administrador</h1>
-            <p>Monitoreo, métricas y consulta de todos los registros institucionales</p>
+            <p>Monitoreo, consulta y planillas consolidadas de Acción Integral</p>
           </div>
         </div>
         <div className="admin-header-actions no-print">
@@ -212,14 +332,14 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
         </div>
       </header>
 
-      {/* Tarjetas de Métricas (KPIs) */}
-      <section className="admin-kpis">
+      {/* Tarjetas KPI de Métricas */}
+      <section className="kpi-grid">
         <div className="kpi-card kpi-total">
-          <div className="kpi-icon">📁</div>
+          <div className="kpi-icon">📊</div>
           <div className="kpi-info">
             <span className="kpi-label">Total de Registros</span>
             <strong className="kpi-value">{metricas.total}</strong>
-            <span className="kpi-sub">En los 3 formatos</span>
+            <span className="kpi-sub">Envíos recibidos</span>
           </div>
         </div>
 
@@ -239,7 +359,7 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
           <div className="kpi-info">
             <span className="kpi-label">Listados de Asistencia</span>
             <strong className="kpi-value">{metricas.asistenciasCount}</strong>
-            <span className="kpi-sub">{metricas.totalAsistentes} personas registradas</span>
+            <span className="kpi-sub">{metricas.totalAsistentes} personas asistentes registradas</span>
           </div>
         </div>
 
@@ -248,8 +368,32 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
           <div className="kpi-info">
             <span className="kpi-label">Caracterizaciones</span>
             <strong className="kpi-value">{metricas.caracterizacionesCount}</strong>
-            <span className="kpi-sub">{metricas.totalPersonasCarac} profesionales / personal</span>
+            <span className="kpi-sub">{metricas.totalPersonasCarac} profesionales registrados</span>
           </div>
+        </div>
+      </section>
+
+      {/* Botones de Acceso Rápido a Planillas Oficiales Consolidadas */}
+      <section className="admin-planillas-banner no-print">
+        <div className="admin-planillas-texto">
+          <strong>Planillas Oficiales Consolidadas</strong>
+          <span>Visualice o imprima los formatos institucionales completos con la rejilla de firmas y datos consolidados:</span>
+        </div>
+        <div className="admin-planillas-botones">
+          <button
+            type="button"
+            className="btn-ver-planilla btn-planilla-asistencia"
+            onClick={() => setVistaPlanilla('asistencia')}
+          >
+            📋 Ver Planilla Oficial de Asistencia ({metricas.totalAsistentes})
+          </button>
+          <button
+            type="button"
+            className="btn-ver-planilla btn-planilla-carac"
+            onClick={() => setVistaPlanilla('caracterizacion')}
+          >
+            📋 Ver Planilla Oficial de Caracterización ({metricas.totalPersonasCarac})
+          </button>
         </div>
       </section>
 
@@ -260,7 +404,7 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
           <input
             type="search"
             className="admin-input-busqueda"
-            placeholder="Buscar por encuestado, cédula, comunidad, moderador, fecha..."
+            placeholder="Buscar por nombre, cédula, comunidad, moderador, fecha..."
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
           />
@@ -335,10 +479,10 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
                   <tr>
                     <th>ID</th>
                     <th>Tipo de Formato</th>
-                    <th>Identificador / Título</th>
+                    <th>Persona / Encuestado</th>
                     <th>Detalles clave</th>
                     <th>Fecha de Actividad</th>
-                    <th>Fecha de Registro</th>
+                    <th>Fecha de Envío</th>
                     <th className="centro">Acciones</th>
                   </tr>
                 </thead>
@@ -346,18 +490,31 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
                   {registrosFiltrados.map((r) => {
                     const f = FORMATOS[r.tipo] || {};
                     const d = r.datos || {};
-                    const tituloPrincipal = d[f.resumen] || 'Sin título';
 
-                    // Resumen secundario según tipo
+                    let nombrePersona = '';
                     let detalleClave = '';
+
                     if (r.tipo === 'encuesta') {
+                      nombrePersona = d.encuestado || 'Sin nombre';
                       detalleClave = d.suboficial ? `Suboficial: ${d.suboficial}` : 'CAD / JAD';
                     } else if (r.tipo === 'asistencia') {
-                      const total = (d.filas || []).filter((fi) => fi.nombre || fi.cedula).length;
-                      detalleClave = `${d.guarnicion || 'Sin guarnición'} • ${total} asistentes`;
+                      if (d.nombre) {
+                        nombrePersona = d.grado ? `${d.grado} ${d.nombre}` : d.nombre;
+                        detalleClave = `CC: ${d.cedula || '—'} • Dep: ${d.dependencia || '—'} • ${d.objetivo || 'Reunión'}`;
+                      } else {
+                        const total = (d.filas || []).filter((fi) => fi.nombre || fi.cedula).length;
+                        nombrePersona = d.objetivo || 'Reunión sin título';
+                        detalleClave = `${d.guarnicion || ''} • ${total} asistentes en lote`;
+                      }
                     } else if (r.tipo === 'caracterizacion') {
-                      const total = (d.filas || []).filter((fi) => fi.nombre || fi.cedula).length;
-                      detalleClave = `${d.municipio || ''} (${d.departamento || ''}) • ${total} personas`;
+                      if (d.nombre) {
+                        nombrePersona = d.nombre;
+                        detalleClave = `CC: ${d.cedula || '—'} • ${d.especialidad || 'Salud'} • ${d.municipio || ''} (${d.comunidad || ''})`;
+                      } else {
+                        const total = (d.filas || []).filter((fi) => fi.nombre || fi.cedula).length;
+                        nombrePersona = d.comunidad || d.municipio || 'Jornada sin título';
+                        detalleClave = `${total} profesionales en lote`;
+                      }
                     }
 
                     return (
@@ -369,7 +526,7 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
                           </span>
                         </td>
                         <td className="admin-td-titulo">
-                          <strong>{tituloPrincipal}</strong>
+                          <strong>{nombrePersona}</strong>
                         </td>
                         <td className="admin-td-detalle">
                           <small>{detalleClave}</small>
@@ -383,7 +540,7 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
                             <button
                               className="sec admin-btn-action"
                               onClick={() => setRegistroDetalle(r)}
-                              title="Abrir e imprimir formato oficial"
+                              title="Abrir e inspeccionar individualmente"
                             >
                               👁️ Ver
                             </button>

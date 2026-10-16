@@ -427,11 +427,184 @@ h3 { color: var(--marino); margin: 1.4rem 0 .2rem; }
 }
 .admin-detalle-meta { display: flex; align-items: center; gap: .8rem; }
 
+/* Secciones de Formulario Individual */
+.formulario-fieldset { border: none; padding: 0; margin: 0; display: grid; gap: 1.4rem; }
+.formulario-seccion-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1.25rem 1.4rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+.formulario-seccion-header {
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #f1f5f9;
+  padding-bottom: .6rem;
+}
+.formulario-seccion-titulo {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--marino);
+  letter-spacing: .2px;
+}
+.formulario-seccion-desc {
+  margin: .25rem 0 0;
+  font-size: .83rem;
+  color: #64748b;
+}
+.firma-individual-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .8rem;
+  padding: .5rem 0;
+}
+
+/* Banner de Planillas Oficiales en Panel Admin */
+.admin-planillas-banner {
+  background: linear-gradient(135deg, #091a2e 0%, #15325b 100%);
+  color: #ffffff;
+  border-radius: 8px;
+  padding: 1rem 1.4rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  box-shadow: 0 4px 15px rgba(9, 26, 46, 0.15);
+}
+.admin-planillas-texto strong {
+  display: block;
+  font-size: 1.02rem;
+  color: #fbbf24;
+  margin-bottom: .2rem;
+}
+.admin-planillas-texto span {
+  font-size: .85rem;
+  color: #cbd5e1;
+}
+.admin-planillas-botones {
+  display: flex;
+  gap: .6rem;
+  flex-wrap: wrap;
+}
+.btn-ver-planilla {
+  padding: .55rem 1.1rem;
+  font-size: .84rem;
+  font-weight: 700;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+  transition: all .15s ease;
+  white-space: nowrap;
+}
+.btn-planilla-asistencia {
+  background: #10b981;
+  color: #ffffff;
+}
+.btn-planilla-asistencia:hover {
+  background: #059669;
+  transform: translateY(-1px);
+}
+.btn-planilla-carac {
+  background: #38bdf8;
+  color: #0c4a6e;
+}
+.btn-planilla-carac:hover {
+  background: #0ea5e9;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+/* Vista de Planilla Oficial Consolidada */
+.admin-planilla-view {
+  display: grid;
+  gap: 1.2rem;
+}
+.admin-barra-planilla {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .8rem;
+  background: #ffffff;
+  border: 1px solid var(--linea);
+  padding: .7rem 1.2rem;
+  border-radius: 6px;
+}
+.admin-planilla-filtros {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+}
+.admin-planilla-select-label {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  font-size: .85rem;
+  font-weight: 600;
+  color: #334155;
+}
+.admin-select-evento {
+  padding: .35rem .6rem;
+  font-size: .82rem;
+  border-radius: 4px;
+  border: 1px solid #cbd5e1;
+}
+.btn-imprimir-planilla {
+  background: var(--marino);
+  color: #ffffff;
+  font-weight: 700;
+  padding: .55rem 1.1rem;
+}
+
+/* Hoja Planilla Imprimible */
+.hoja-planilla-imprimible {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.planilla-resumen-evento {
+  margin: 1rem 0;
+}
+.tabla-cabecera-evento {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .88rem;
+  margin-bottom: .8rem;
+}
+.tabla-cabecera-evento td {
+  border: 1px solid var(--linea);
+  padding: .5rem .7rem;
+  background: #f8fafc;
+}
+.rejilla-oficial-consolidada {
+  font-size: .82rem;
+}
+.th-num, .celda-num {
+  width: 32px;
+  text-align: center;
+  font-weight: 700;
+  color: #475569;
+}
+.celda-dato {
+  padding: .4rem .55rem;
+}
+.sin-firma-linea {
+  display: block;
+  width: 60px;
+  height: 1px;
+  border-bottom: 1px dashed #cbd5e1;
+  margin: 0 auto;
+}
+
 @media print {
   body { background: #fff; }
   .no-print { display: none !important; }
   main { padding: 0; max-width: none; }
-  .hoja { border: 0; padding: 0; }
+  .hoja { border: 0; padding: 0; box-shadow: none; }
   input, select { border: 0 !important; }
+  .firma-render-img, .firma-tabla-img { filter: contrast(150%); }
   @page { size: landscape; margin: 10mm; }
 }

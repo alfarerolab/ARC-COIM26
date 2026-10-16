@@ -53,7 +53,36 @@ export const FORMATOS = {
     autoridad: 'JPLAN',
     codigo: 'ARC-FT-002-JPLAN-V07',
     vigencia: '28/11/2026',
-    resumen: 'objetivo',
+    resumen: 'nombre',
+    requiereFirmaAsistente: true,
+    secciones: [
+      {
+        titulo: 'Información de la Reunión o Capacitación',
+        descripcion: 'Datos generales del evento institucional liderado por la Armada de Colombia.',
+        campos: [
+          { k: 'objetivo', label: 'Objetivo', span: 2, placeholder: 'Tema o propósito de la reunión o capacitación' },
+          { k: 'moderador', label: 'Moderador', placeholder: 'Grado y nombre del responsable' },
+          { k: 'guarnicion', label: 'Guarnición / Unidad', placeholder: 'Ej. COIM26, ARC Bolívar, etc.' },
+          { k: 'tipo', label: 'Tipo de actividad', type: 'select', options: ['Capacitación', 'Reunión', 'Otro'] },
+          { k: 'cual', label: '¿Cuál? (si seleccionó Otro)', placeholder: 'Especifique el tipo' },
+          { k: 'fecha', label: 'Fecha', type: 'date' },
+          { k: 'hora', label: 'Hora', type: 'time' },
+        ],
+      },
+      {
+        titulo: 'Datos del Asistente',
+        descripcion: 'Diligencie sus datos individuales para registrar su asistencia oficial.',
+        campos: [
+          { k: 'grado', label: 'Grado', placeholder: 'Ej. CC, TN, TF, SM, CP, Particular, etc.' },
+          { k: 'nombre', label: 'Apellidos y nombres', span: 2, placeholder: 'Nombre completo del asistente' },
+          { k: 'dependencia', label: 'Dependencia / Institución', placeholder: 'Unidad militar, entidad o comunidad' },
+          { k: 'cedula', label: 'No. de Cédula', placeholder: 'Número de documento de identidad' },
+          { k: 'celular', label: 'Número de Celular', type: 'tel', placeholder: 'Ej. 300 123 4567' },
+          { k: 'correo', label: 'Correo electrónico', type: 'email', placeholder: 'correo@ejemplo.com' },
+        ],
+      },
+    ],
+    // Todos los campos consolidados para inicialización
     campos: [
       { k: 'objetivo', label: 'Objetivo', span: 2 },
       { k: 'moderador', label: 'Moderador' },
@@ -62,9 +91,15 @@ export const FORMATOS = {
       { k: 'cual', label: '¿Cuál? (si es Otro)' },
       { k: 'fecha', label: 'Fecha', type: 'date' },
       { k: 'hora', label: 'Hora', type: 'time' },
+      { k: 'grado', label: 'Grado' },
+      { k: 'nombre', label: 'Apellidos y nombres' },
+      { k: 'dependencia', label: 'Dependencia' },
+      { k: 'cedula', label: 'Cédula' },
+      { k: 'celular', label: 'Celular' },
+      { k: 'correo', label: 'Correo' },
     ],
-    tabla: {
-      filas: 20,
+    // Estructura oficial de columnas para la planilla consolidada en el Panel de Administrador
+    tablaConsolidada: {
       cols: [
         { k: 'grado', label: 'Grado' },
         { k: 'nombre', label: 'Apellidos y nombres' },
@@ -72,7 +107,7 @@ export const FORMATOS = {
         { k: 'cedula', label: 'Cédula' },
         { k: 'celular', label: 'Celular' },
         { k: 'correo', label: 'Correo' },
-        { k: 'firma', label: 'Firma' },
+        { k: 'firma', label: 'Firma digital' },
       ],
     },
   },
@@ -84,17 +119,56 @@ export const FORMATOS = {
     autoridad: 'JACID',
     codigo: 'ACCIN-FT-005-JACID-V04',
     vigencia: '28/11/2026',
-    resumen: 'comunidad',
+    resumen: 'nombre',
+    secciones: [
+      {
+        titulo: 'Información de la Jornada de Apoyo al Desarrollo (JAD)',
+        descripcion: 'Datos de la jornada o campaña liderada por la unidad militar.',
+        campos: [
+          { k: 'comunidad', label: 'Comunidad beneficiaria', placeholder: 'Nombre de la comunidad o vereda' },
+          { k: 'municipio', label: 'Municipio', placeholder: 'Municipio' },
+          { k: 'departamento', label: 'Departamento', placeholder: 'Departamento' },
+          { k: 'fechas', label: 'Fechas de realización', placeholder: 'Ej. 16 al 18 de Noviembre de 2026' },
+          { k: 'unidad', label: 'Unidad militar que lidera la JAD', placeholder: 'Ej. COIM26' },
+          { k: 'encargado', label: 'Encargado Acción Integral (grado, nombre, cargo y teléfono)', span: 2 },
+        ],
+      },
+      {
+        titulo: 'Datos del Profesional / Personal de Salud',
+        descripcion: 'Registro individual de cada profesional participante en la jornada.',
+        campos: [
+          { k: 'nombre', label: 'Nombres y apellidos', span: 2, placeholder: 'Nombre completo del profesional' },
+          { k: 'cedula', label: 'No. de cédula', placeholder: 'Cédula de ciudadanía' },
+          { k: 'tarjeta', label: 'No. tarjeta profesional', placeholder: 'Número de tarjeta profesional' },
+          { k: 'especialidad', label: 'Especialidad', placeholder: 'Ej. Pediatría, Odontología, Medicina General' },
+          { k: 'servicios', label: 'Servicios a ofrecer', placeholder: 'Ej. Consulta médica, profilaxis, vacunación' },
+          { k: 'entidad', label: 'Entidad que representa', placeholder: 'Ej. Hospital, Fundación, Particular' },
+          { k: 'gsrh', label: 'G.S. - RH', placeholder: 'Ej. O+, A+, etc.' },
+          { k: 'eps', label: 'EPS', placeholder: 'EPS a la que está afiliado' },
+          { k: 'celular', label: 'Número celular', type: 'tel', placeholder: 'Ej. 310 987 6543' },
+        ],
+      },
+    ],
+    // Todos los campos consolidados para inicialización
     campos: [
       { k: 'comunidad', label: 'Comunidad' },
       { k: 'municipio', label: 'Municipio' },
       { k: 'departamento', label: 'Departamento' },
       { k: 'fechas', label: 'Fechas' },
       { k: 'unidad', label: 'Unidad militar que lidera la JAD' },
-      { k: 'encargado', label: 'Encargado Acción Integral (grado, nombre, cargo y teléfono)' },
+      { k: 'encargado', label: 'Encargado Acción Integral' },
+      { k: 'nombre', label: 'Nombres y apellidos' },
+      { k: 'cedula', label: 'No. de cédula' },
+      { k: 'tarjeta', label: 'No. tarjeta profesional' },
+      { k: 'especialidad', label: 'Especialidad' },
+      { k: 'servicios', label: 'Servicios a ofrecer' },
+      { k: 'entidad', label: 'Entidad que representa' },
+      { k: 'gsrh', label: 'G.S.-RH' },
+      { k: 'eps', label: 'EPS' },
+      { k: 'celular', label: 'Número celular' },
     ],
-    tabla: {
-      filas: 10,
+    // Estructura oficial de columnas para la planilla consolidada en el Panel de Administrador
+    tablaConsolidada: {
       cols: [
         { k: 'nombre', label: 'Nombres y apellidos' },
         { k: 'cedula', label: 'No. de cédula' },
