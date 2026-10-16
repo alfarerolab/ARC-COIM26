@@ -162,14 +162,14 @@ export default function FirmaCanvas({
         />
         {!tieneTrazo && !dibujando && (
           <div className="firma-canvas-placeholder">
-            <span>✍️ {placeholder}</span>
+            <span>{placeholder}</span>
           </div>
         )}
       </div>
       <div className="firma-canvas-actions no-print">
         {tieneTrazo && (
           <button type="button" className="sec firma-btn-limpiar" onClick={limpiar}>
-            🗑️ Limpiar firma
+            Limpiar firma
           </button>
         )}
       </div>

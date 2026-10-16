@@ -316,8 +316,18 @@ h3 { color: var(--marino); margin: 1.4rem 0 .2rem; }
 /* KPIs */
 .admin-kpis {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
+}
+@media (max-width: 1024px) {
+  .admin-kpis {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 580px) {
+  .admin-kpis {
+    grid-template-columns: 1fr;
+  }
 }
 .kpi-card {
   background: #fff;
@@ -355,8 +365,7 @@ h3 { color: var(--marino); margin: 1.4rem 0 .2rem; }
   justify-content: space-between;
 }
 .admin-busqueda-wrap { position: relative; flex: 1; min-width: 260px; max-width: 480px; }
-.admin-search-icon { position: absolute; left: .6rem; top: 50%; transform: translateY(-50%); font-size: .9rem; opacity: .5; pointer-events: none; }
-.admin-input-busqueda { padding-left: 2rem !important; padding-right: 1.8rem !important; border-radius: 20px !important; }
+.admin-input-busqueda { padding: .45rem .85rem !important; border-radius: 20px !important; }
 .admin-btn-clear {
   position: absolute;
   right: .5rem;
@@ -472,61 +481,6 @@ h3 { color: var(--marino); margin: 1.4rem 0 .2rem; }
   padding: .5rem 0;
 }
 
-/* Banner de Planillas Oficiales en Panel Admin */
-.admin-planillas-banner {
-  background: linear-gradient(135deg, #091a2e 0%, #15325b 100%);
-  color: #ffffff;
-  border-radius: 8px;
-  padding: 1rem 1.4rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-  box-shadow: 0 4px 15px rgba(9, 26, 46, 0.15);
-}
-.admin-planillas-texto strong {
-  display: block;
-  font-size: 1.02rem;
-  color: #fbbf24;
-  margin-bottom: .2rem;
-}
-.admin-planillas-texto span {
-  font-size: .85rem;
-  color: #cbd5e1;
-}
-.admin-planillas-botones {
-  display: flex;
-  gap: .6rem;
-  flex-wrap: wrap;
-}
-.btn-ver-planilla {
-  padding: .55rem 1.1rem;
-  font-size: .84rem;
-  font-weight: 700;
-  border-radius: 6px;
-  cursor: pointer;
-  border: none;
-  transition: all .15s ease;
-  white-space: nowrap;
-}
-.btn-planilla-asistencia {
-  background: #10b981;
-  color: #ffffff;
-}
-.btn-planilla-asistencia:hover {
-  background: #059669;
-  transform: translateY(-1px);
-}
-.btn-planilla-carac {
-  background: #38bdf8;
-  color: #0c4a6e;
-}
-.btn-planilla-carac:hover {
-  background: #0ea5e9;
-  color: #ffffff;
-  transform: translateY(-1px);
-}
 
 /* Vista de Planilla Oficial Consolidada */
 .admin-planilla-view {
@@ -663,7 +617,7 @@ h3 { color: var(--marino); margin: 1.4rem 0 .2rem; }
     font-size: 1.02rem !important;
     padding: .85rem 1rem !important;
   }
-  .kpi-grid {
+  .admin-kpis {
     grid-template-columns: 1fr;
     gap: .75rem;
   }
@@ -683,14 +637,7 @@ h3 { color: var(--marino); margin: 1.4rem 0 .2rem; }
     font-size: .78rem;
     padding: .4rem .5rem;
   }
-  .admin-planillas-banner {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .btn-ver-planilla {
-    width: 100%;
-    text-align: center;
-  }
+
   .admin-toolbar {
     flex-direction: column;
     align-items: stretch;

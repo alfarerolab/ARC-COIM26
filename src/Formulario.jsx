@@ -49,7 +49,6 @@ export default function Formulario({ tipo, f, datos, soloLectura, onGuardado }) 
     <form className="hoja" onSubmit={guardar}>
       {notificacion && (
         <div className={`toast-banner toast-${notificacion.tipo} no-print`} role="alert">
-          <span className="toast-icon">{notificacion.tipo === 'exito' ? '✅' : '⚠️'}</span>
           <div className="toast-text">
             <strong>{notificacion.titulo}</strong>
             <p>{notificacion.mensaje}</p>
@@ -277,7 +276,7 @@ export default function Formulario({ tipo, f, datos, soloLectura, onGuardado }) 
                 <div key={x} className="firma-bloque-item">
                   {!soloLectura && (
                     <div className="firma-editor-wrap no-print">
-                      <label className="firma-box-title">✍️ Firma digital del encuestado (dibuje con su dedo):</label>
+                      <label className="firma-box-title">Firma digital del encuestado (dibuje con su dedo):</label>
                       <FirmaCanvas
                         alto={130}
                         valorInicial={d.firmaEncuestado}
@@ -319,7 +318,7 @@ export default function Formulario({ tipo, f, datos, soloLectura, onGuardado }) 
       {!soloLectura && (
         <div className="acciones no-print">
           <button type="submit" className="btn-guardar-principal" disabled={enviando}>
-            {enviando ? 'Guardando registro…' : '💾 Guardar registro y continuar'}
+            {enviando ? 'Guardando registro…' : 'Guardar registro y continuar'}
           </button>
         </div>
       )}

@@ -72,7 +72,7 @@ export default function PlanillaOficial({ tipo, registros, onVolver }) {
       {/* Barra superior de controles */}
       <div className="barra no-print admin-barra-planilla">
         <button className="sec" onClick={onVolver}>
-          ← Volver al Panel de Registros
+          Volver al Panel de Registros
         </button>
 
         <div className="admin-planilla-filtros">
@@ -99,7 +99,7 @@ export default function PlanillaOficial({ tipo, registros, onVolver }) {
         </div>
 
         <button onClick={() => window.print()} className="btn-imprimir-planilla">
-          🖨️ Imprimir / Guardar PDF
+          Imprimir / Guardar PDF
         </button>
       </div>
 

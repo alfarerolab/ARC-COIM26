@@ -65,7 +65,7 @@ export default function LoginAdmin({ onLoginExitoso }) {
 
           {err && (
             <div className="admin-login-error" role="alert">
-              ⚠️ {err}
+              {err}
             </div>
           )}
 
@@ -76,7 +76,7 @@ export default function LoginAdmin({ onLoginExitoso }) {
 
         <div className="admin-login-footer">
           <button type="button" onClick={irAPublico} className="admin-login-link">
-            ← Volver al portal público de formatos
+            Volver al portal público de formatos
           </button>
         </div>
       </div>

@@ -134,7 +134,7 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
   const [filtroTipo, setFiltroTipo] = useState('todos');
   const [busqueda, setBusqueda] = useState('');
   const [registroDetalle, setRegistroDetalle] = useState(null);
-  const [vistaPlanilla, setVistaPlanilla] = useState(null); // 'asistencia' | 'caracterizacion' | null
+  const [vistaPlanilla, setVistaPlanilla] = useState(null);
 
   const cargarRegistros = async () => {
     setCargando(true);
@@ -188,7 +188,7 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
     });
     const promSatisfaccion = totalCalif > 0 ? (sumaCalif / totalCalif).toFixed(1) : null;
 
-    // Total personas en asistencias (contando tanto individuales como d.filas legacy)
+    // Total personas en asistencias
     let totalAsistentes = 0;
     asistencias.forEach((a) => {
       const d = a.datos || {};
@@ -233,7 +233,6 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
       const f = FORMATOS[r.tipo];
       const d = r.datos || {};
 
-      // Búsqueda en campos principales
       const resumen = String(d[f?.resumen] || '').toLowerCase();
       const nombre = String(d.nombre || '').toLowerCase();
       const cedula = String(d.cedula || '').toLowerCase();
@@ -254,7 +253,6 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
         return true;
       }
 
-      // Búsqueda en filas legacy
       if (Array.isArray(d.filas)) {
         const textoFilas = d.filas
           .map((fi) => Object.values(fi).join(' '))
@@ -276,7 +274,7 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
     descargarCSV(`${tipo}_consolidado.csv`, csvContent);
   };
 
-  // Si está abierta la Planilla Oficial Consolidada (Listado con rejilla institucional)
+  // Si está abierta la Planilla Oficial Consolidada
   if (vistaPlanilla) {
     const regsTipo = registros.filter((r) => r.tipo === vistaPlanilla);
     return (
@@ -295,13 +293,13 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
       <div className="admin-detalle-view">
         <div className="barra no-print admin-barra-detalle">
           <button className="sec" onClick={() => setRegistroDetalle(null)}>
-            ← Volver al Panel Administrador
+            Volver al Panel Administrador
           </button>
           <div className="admin-detalle-meta">
             <span className={`badge-tipo badge-${registroDetalle.tipo}`}>{f.tab}</span>
             <small>ID #{registroDetalle.id} • {new Date(registroDetalle.creado).toLocaleString('es-CO')}</small>
           </div>
-          <button onClick={() => window.print()}>🖨️ Imprimir o guardar PDF</button>
+          <button onClick={() => window.print()}>Imprimir o guardar PDF</button>
         </div>
         <Formulario tipo={registroDetalle.tipo} f={f} datos={registroDetalle.datos} soloLectura />
       </div>
@@ -321,21 +319,20 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
         </div>
         <div className="admin-header-actions no-print">
           <button className="sec" onClick={cargarRegistros} title="Recargar datos">
-            🔄 Actualizar
+            Actualizar
           </button>
           <button className="sec" onClick={() => (window.location.href = '/')} title="Ver el portal público de formatos">
-            📋 Ir al Portal Público
+            Ir al Portal Público
           </button>
           <button className="peligro" onClick={onCerrarAdmin} title="Cerrar sesión de administrador">
-            🔒 Cerrar Sesión
+            Cerrar Sesión
           </button>
         </div>
       </header>
 
-      {/* Tarjetas KPI de Métricas */}
-      <section className="kpi-grid">
+      {/* Tarjetas KPI de Métricas (Grid de 4 columnas limpio sin emojis) */}
+      <section className="admin-kpis">
         <div className="kpi-card kpi-total">
-          <div className="kpi-icon">📊</div>
           <div className="kpi-info">
             <span className="kpi-label">Total de Registros</span>
             <strong className="kpi-value">{metricas.total}</strong>
@@ -344,7 +341,6 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
         </div>
 
         <div className="kpi-card kpi-encuesta">
-          <div className="kpi-icon">⭐</div>
           <div className="kpi-info">
             <span className="kpi-label">Encuestas de Satisfacción</span>
             <strong className="kpi-value">{metricas.encuestasCount}</strong>
@@ -355,16 +351,14 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
         </div>
 
         <div className="kpi-card kpi-asistencia">
-          <div className="kpi-icon">👥</div>
           <div className="kpi-info">
             <span className="kpi-label">Listados de Asistencia</span>
             <strong className="kpi-value">{metricas.asistenciasCount}</strong>
-            <span className="kpi-sub">{metricas.totalAsistentes} personas asistentes registradas</span>
+            <span className="kpi-sub">{metricas.totalAsistentes} personas registradas</span>
           </div>
         </div>
 
         <div className="kpi-card kpi-caracterizacion">
-          <div className="kpi-icon">📋</div>
           <div className="kpi-info">
             <span className="kpi-label">Caracterizaciones</span>
             <strong className="kpi-value">{metricas.caracterizacionesCount}</strong>
@@ -373,34 +367,9 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
         </div>
       </section>
 
-      {/* Botones de Acceso Rápido a Planillas Oficiales Consolidadas */}
-      <section className="admin-planillas-banner no-print">
-        <div className="admin-planillas-texto">
-          <strong>Planillas Oficiales Consolidadas</strong>
-          <span>Visualice o imprima los formatos institucionales completos con la rejilla de firmas y datos consolidados:</span>
-        </div>
-        <div className="admin-planillas-botones">
-          <button
-            type="button"
-            className="btn-ver-planilla btn-planilla-asistencia"
-            onClick={() => setVistaPlanilla('asistencia')}
-          >
-            📋 Ver Planilla Oficial de Asistencia ({metricas.totalAsistentes})
-          </button>
-          <button
-            type="button"
-            className="btn-ver-planilla btn-planilla-carac"
-            onClick={() => setVistaPlanilla('caracterizacion')}
-          >
-            📋 Ver Planilla Oficial de Caracterización ({metricas.totalPersonasCarac})
-          </button>
-        </div>
-      </section>
-
-      {/* Controles de Búsqueda y Exportación */}
+      {/* Controles de Búsqueda, Filtros y Planillas */}
       <section className="admin-toolbar">
         <div className="admin-busqueda-wrap">
-          <span className="admin-search-icon">🔍</span>
           <input
             type="search"
             className="admin-input-busqueda"
@@ -443,7 +412,14 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
         </div>
 
         <div className="admin-exportar-wrap">
-          <span className="admin-export-label">Exportar CSV:</span>
+          <span className="admin-export-label">Planillas oficiales:</span>
+          <button className="sec admin-btn-csv" onClick={() => setVistaPlanilla('asistencia')}>
+            Planilla Asistencia ({metricas.totalAsistentes})
+          </button>
+          <button className="sec admin-btn-csv" onClick={() => setVistaPlanilla('caracterizacion')}>
+            Planilla Caracterización ({metricas.totalPersonasCarac})
+          </button>
+          <span className="admin-export-label" style={{ marginLeft: '.5rem' }}>Exportar CSV:</span>
           <button className="sec admin-btn-csv" onClick={() => descargarCSVFormato('encuesta')}>
             Encuestas
           </button>
@@ -457,7 +433,7 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
       </section>
 
       {/* Estado de Carga y Errores */}
-      {error && <p className="admin-alert-error" role="alert">⚠️ {error}</p>}
+      {error && <p className="admin-alert-error" role="alert">{error}</p>}
       {cargando && <p className="admin-loading">Cargando registros del sistema…</p>}
 
       {/* Tabla Unificada de Registros */}
@@ -542,14 +518,14 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
                               onClick={() => setRegistroDetalle(r)}
                               title="Abrir e inspeccionar individualmente"
                             >
-                              👁️ Ver
+                              Ver
                             </button>
                             <button
                               className="peligro admin-btn-action"
                               onClick={(e) => borrarRegistro(r.id, e)}
                               title="Eliminar permanentemente"
                             >
-                              🗑️
+                              Eliminar
                             </button>
                           </div>
                         </td>
