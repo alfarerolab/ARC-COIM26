@@ -340,7 +340,12 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
           </div>
         </div>
 
-        <div className="kpi-card kpi-encuesta">
+        <div
+          className="kpi-card kpi-encuesta"
+          onClick={() => setVistaPlanilla('encuesta')}
+          style={{ cursor: 'pointer' }}
+          title="Abrir Planilla Oficial de Encuestas de Satisfacción"
+        >
           <div className="kpi-info">
             <span className="kpi-label">Encuestas de Satisfacción</span>
             <strong className="kpi-value">{metricas.encuestasCount}</strong>
@@ -350,7 +355,12 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
           </div>
         </div>
 
-        <div className="kpi-card kpi-asistencia">
+        <div
+          className="kpi-card kpi-asistencia"
+          onClick={() => setVistaPlanilla('asistencia')}
+          style={{ cursor: 'pointer' }}
+          title="Abrir Planilla Oficial de Asistencia"
+        >
           <div className="kpi-info">
             <span className="kpi-label">Listados de Asistencia</span>
             <strong className="kpi-value">{metricas.asistenciasCount}</strong>
@@ -358,7 +368,12 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
           </div>
         </div>
 
-        <div className="kpi-card kpi-caracterizacion">
+        <div
+          className="kpi-card kpi-caracterizacion"
+          onClick={() => setVistaPlanilla('caracterizacion')}
+          style={{ cursor: 'pointer' }}
+          title="Abrir Planilla Oficial de Caracterización"
+        >
           <div className="kpi-info">
             <span className="kpi-label">Caracterizaciones</span>
             <strong className="kpi-value">{metricas.caracterizacionesCount}</strong>
@@ -413,6 +428,9 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
 
         <div className="admin-exportar-wrap">
           <span className="admin-export-label">Planillas oficiales:</span>
+          <button className="sec admin-btn-csv" onClick={() => setVistaPlanilla('encuesta')}>
+            Planilla Encuestas ({metricas.encuestasCount})
+          </button>
           <button className="sec admin-btn-csv" onClick={() => setVistaPlanilla('asistencia')}>
             Planilla Asistencia ({metricas.totalAsistentes})
           </button>

@@ -44,6 +44,23 @@ export const FORMATOS = {
       '¿Hay algún otro comentario que le gustaría hacer sobre la Armada Nacional y su trabajo en su comunidad?',
     ],
     firmas: ['Firma encuestado', 'Firma Suboficial de Acción Integral y Desarrollo'],
+    tablaConsolidada: {
+      cols: [
+        { k: 'encuestado', label: 'Encuestado (Nombre)' },
+        { k: 'p1', label: 'P1' },
+        { k: 'p2', label: 'P2' },
+        { k: 'p3', label: 'P3' },
+        { k: 'p4', label: 'P4' },
+        { k: 'p5', label: 'P5' },
+        { k: 'p6', label: 'P6' },
+        { k: 'p7', label: 'P7' },
+        { k: 'p8', label: 'P8' },
+        { k: 'p9', label: 'P9' },
+        { k: 'p10', label: 'P10' },
+        { k: 'promedio', label: 'Promedio' },
+        { k: 'firma', label: 'Firma digital' },
+      ],
+    },
   },
 
   asistencia: {

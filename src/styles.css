@@ -563,6 +563,28 @@ h3 { color: var(--marino); margin: 1.4rem 0 .2rem; }
   margin: 0 auto;
 }
 
+.guia-preguntas-encuesta {
+  margin-top: 1rem;
+  padding: .8rem 1.1rem;
+  background: #f8fafc;
+  border: 1px solid var(--linea);
+  border-radius: 4px;
+  font-size: .78rem;
+}
+.guia-preguntas-encuesta strong {
+  display: block;
+  margin-bottom: .4rem;
+  color: var(--marino);
+}
+.lista-preguntas-guia {
+  margin: 0;
+  padding-left: 1.2rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: .3rem .8rem;
+  color: #475569;
+}
+
 /* Reglas Responsivas para Móviles y Tablets */
 @media (max-width: 768px) {
   .navbar-container {
