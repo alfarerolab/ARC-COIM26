@@ -154,25 +154,26 @@ export default function Formulario({ tipo, f, datos, soloLectura, onGuardado }) 
               </p>
             </div>
             <div className="firma-individual-wrap">
-              {!soloLectura ? (
-                <div className="no-print">
+              {!soloLectura && (
+                <div className="firma-editor-container no-print">
                   <FirmaCanvas
-                    ancho={340}
                     alto={140}
                     valorInicial={d.firma || ''}
                     onChange={(v) => set('firma', v)}
                     placeholder="Firme con su dedo aquí"
                   />
                 </div>
-              ) : null}
+              )}
 
-              {/* Render de la firma para impresión o visualización en solo lectura */}
-              <div className="firma-preview-espacio">
-                {d.firma ? (
-                  <img src={d.firma} alt="Firma Asistente" className="firma-render-img" />
-                ) : (
-                  <div className="firma-espacio-blanco" />
-                )}
+              {/* Render de la firma para impresión física o visualización en solo lectura */}
+              <div className={`firma-bloque-item firma-bloque-asistente ${!soloLectura ? 'only-print' : ''}`}>
+                <div className="firma-preview-espacio">
+                  {d.firma ? (
+                    <img src={d.firma} alt="Firma Asistente" className="firma-render-img" />
+                  ) : (
+                    <div className="firma-espacio-blanco" />
+                  )}
+                </div>
                 <span className="firma-linea-separador" />
                 <span className="firma-texto-label">Firma del Asistente</span>
               </div>
@@ -274,28 +275,29 @@ export default function Formulario({ tipo, f, datos, soloLectura, onGuardado }) 
             if (esFirmaTactilEncuestado) {
               return (
                 <div key={x} className="firma-bloque-item">
-                  {!soloLectura ? (
+                  {!soloLectura && (
                     <div className="firma-editor-wrap no-print">
                       <label className="firma-box-title">✍️ Firma digital del encuestado (dibuje con su dedo):</label>
                       <FirmaCanvas
-                        ancho={280}
-                        alto={120}
+                        alto={130}
                         valorInicial={d.firmaEncuestado}
                         onChange={(v) => set('firmaEncuestado', v)}
                         placeholder="Firme con su dedo aquí"
                       />
                     </div>
-                  ) : null}
+                  )}
 
-                  <div className="firma-preview-espacio">
-                    {d.firmaEncuestado ? (
-                      <img src={d.firmaEncuestado} alt="Firma encuestado" className="firma-render-img" />
-                    ) : (
-                      <div className="firma-espacio-blanco" />
-                    )}
+                  <div className={`firma-bloque-print-wrap ${!soloLectura ? 'only-print' : ''}`}>
+                    <div className="firma-preview-espacio">
+                      {d.firmaEncuestado ? (
+                        <img src={d.firmaEncuestado} alt="Firma encuestado" className="firma-render-img" />
+                      ) : (
+                        <div className="firma-espacio-blanco" />
+                      )}
+                    </div>
+                    <span className="firma-linea-separador" />
+                    <span className="firma-texto-label">{x}</span>
                   </div>
-                  <span className="firma-linea-separador" />
-                  <span className="firma-texto-label">{x}</span>
                 </div>
               );
             }
