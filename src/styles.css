@@ -501,7 +501,29 @@ h3 { color: var(--marino); margin: 1.4rem 0 .2rem; }
 .admin-planilla-filtros {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: .8rem;
+}
+.admin-toggle-encuesta {
+  display: inline-flex;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid #cbd5e1;
+}
+.admin-toggle-encuesta .admin-filtro-btn {
+  padding: .35rem .75rem;
+  font-size: .8rem;
+  border: none;
+  background: #ffffff;
+  color: #334155;
+  cursor: pointer;
+  border-radius: 0;
+  transition: all .2s ease;
+}
+.admin-toggle-encuesta .admin-filtro-btn.activo {
+  background: var(--marino);
+  color: #ffffff;
+  font-weight: 700;
 }
 .admin-planilla-select-label {
   display: inline-flex;
@@ -522,6 +544,30 @@ h3 { color: var(--marino); margin: 1.4rem 0 .2rem; }
   color: #ffffff;
   font-weight: 700;
   padding: .55rem 1.1rem;
+}
+
+/* Contenedor de Folios Paginados (20 filas por hoja) */
+.admin-folios-contenedor {
+  display: flex;
+  flex-direction: column;
+  gap: 2.2rem;
+}
+.admin-folio-wrap {
+  position: relative;
+}
+.admin-folio-etiqueta {
+  background: #f1f5f9;
+  color: var(--marino);
+  border-left: 4px solid var(--marino);
+  padding: .45rem .85rem;
+  font-size: .82rem;
+  font-weight: 700;
+  border-radius: 4px;
+  margin-bottom: .6rem;
+}
+.hoja-folio-imprimible {
+  background: #ffffff;
+  box-shadow: var(--sombra);
 }
 
 /* Hoja Planilla Imprimible */
@@ -698,6 +744,34 @@ h3 { color: var(--marino); margin: 1.4rem 0 .2rem; }
     width: 100% !important;
     min-width: 0 !important;
   }
+  .admin-barra-planilla {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .admin-planilla-filtros {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+  .admin-toggle-encuesta {
+    width: 100%;
+  }
+  .admin-toggle-encuesta .admin-filtro-btn {
+    flex: 1;
+    text-align: center;
+  }
+  .admin-planilla-select-label {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+  }
+  .admin-select-evento {
+    width: 100%;
+    margin-left: 0;
+  }
+  .btn-imprimir-planilla {
+    width: 100%;
+  }
 }
 
 @media print {
@@ -708,5 +782,21 @@ h3 { color: var(--marino); margin: 1.4rem 0 .2rem; }
   .hoja { border: 0; padding: 0; box-shadow: none; }
   input, select { border: 0 !important; }
   .firma-render-img, .firma-tabla-img { filter: contrast(150%); }
+  .admin-folios-contenedor { gap: 0 !important; }
+  .admin-folio-wrap {
+    page-break-after: always;
+    break-after: page;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .admin-folio-wrap:last-child {
+    page-break-after: auto;
+    break-after: auto;
+  }
+  .hoja-folio-imprimible {
+    box-shadow: none !important;
+    padding: 0 !important;
+    border: none !important;
+  }
   @page { size: landscape; margin: 10mm; }
 }
