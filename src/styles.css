@@ -774,29 +774,227 @@ h3 { color: var(--marino); margin: 1.4rem 0 .2rem; }
   }
 }
 
+@page {
+  size: landscape;
+  margin: 5mm 8mm 5mm 8mm;
+}
+
 @media print {
-  body { background: #fff; }
-  .no-print { display: none !important; }
-  .only-print { display: flex !important; }
-  main { padding: 0; max-width: none; }
-  .hoja { border: 0; padding: 0; box-shadow: none; }
-  input, select { border: 0 !important; }
-  .firma-render-img, .firma-tabla-img { filter: contrast(150%); }
-  .admin-folios-contenedor { gap: 0 !important; }
+  html, body {
+    background: #ffffff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .only-print {
+    display: flex !important;
+  }
+  main, .main-content {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+  .admin-planilla-view {
+    display: block !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  .admin-folios-contenedor {
+    gap: 0 !important;
+    display: block !important;
+  }
   .admin-folio-wrap {
-    page-break-after: always;
-    break-after: page;
+    page-break-after: always !important;
+    break-after: page !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
     margin: 0 !important;
     padding: 0 !important;
   }
   .admin-folio-wrap:last-child {
-    page-break-after: auto;
-    break-after: auto;
+    page-break-after: auto !important;
+    break-after: auto !important;
   }
-  .hoja-folio-imprimible {
-    box-shadow: none !important;
+  .admin-folio-etiqueta {
+    display: none !important;
+  }
+
+  /* Hoja Oficial del Folio - Ajustada a exactamente 1 hoja física */
+  .hoja, .hoja-planilla-imprimible, .hoja-folio-imprimible {
+    border: 0 !important;
     padding: 0 !important;
-    border: none !important;
+    box-shadow: none !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
-  @page { size: landscape; margin: 10mm; }
+
+  /* Membrete Compacto */
+  .hoja-folio-imprimible .membrete {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin-bottom: 2px !important;
+  }
+  .hoja-folio-imprimible .membrete td {
+    padding: 2px 4px !important;
+    font-size: 7.5pt !important;
+    line-height: 1.15 !important;
+    border: 1px solid #1e293b !important;
+  }
+  .hoja-folio-imprimible .membrete .escudo {
+    width: 55px !important;
+    padding: 2px !important;
+    text-align: center !important;
+  }
+  .hoja-folio-imprimible .membrete .escudo-img {
+    max-width: 45px !important;
+    max-height: 38px !important;
+    margin: 0 auto !important;
+  }
+  .hoja-folio-imprimible .membrete .titulo {
+    font-size: 9pt !important;
+    line-height: 1.1 !important;
+    padding: 2px 4px !important;
+  }
+  .hoja-folio-imprimible .membrete .titulo small {
+    font-size: 7pt !important;
+    margin-top: 1px !important;
+    line-height: 1.1 !important;
+  }
+
+  /* Cabecera del Evento Compacta */
+  .hoja-folio-imprimible .planilla-resumen-evento {
+    margin: 2px 0 !important;
+  }
+  .hoja-folio-imprimible .tabla-cabecera-evento {
+    width: 100% !important;
+    margin-bottom: 2px !important;
+    font-size: 7.5pt !important;
+    border-collapse: collapse !important;
+  }
+  .hoja-folio-imprimible .tabla-cabecera-evento td {
+    padding: 1.5px 4px !important;
+    line-height: 1.15 !important;
+    background: #f8fafc !important;
+    border: 1px solid #1e293b !important;
+  }
+
+  /* Rejilla de 20 Filas Exacta - Ajuste micrométrico para 1 sola hoja */
+  .tabla-scroll {
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .rejilla-oficial-consolidada {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    font-size: 7pt !important;
+    line-height: 1.05 !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+  .rejilla-oficial-consolidada th {
+    padding: 2px 3px !important;
+    font-size: 7pt !important;
+    background: #eef2f6 !important;
+    font-weight: 700 !important;
+    border: 1px solid #1e293b !important;
+  }
+  .rejilla-oficial-consolidada td {
+    padding: 1px 3px !important;
+    font-size: 7pt !important;
+    height: 14.5px !important;
+    max-height: 14.5px !important;
+    border: 1px solid #1e293b !important;
+  }
+  .rejilla-oficial-consolidada .celda-num,
+  .rejilla-oficial-consolidada .th-num {
+    width: 22px !important;
+    font-size: 7pt !important;
+    padding: 1px 2px !important;
+  }
+  .rejilla-oficial-consolidada .celda-dato {
+    padding: 1px 3px !important;
+  }
+  .rejilla-oficial-consolidada .celda-firma {
+    height: 14.5px !important;
+    max-height: 14.5px !important;
+    padding: 0 2px !important;
+    min-width: 65px !important;
+    vertical-align: middle !important;
+  }
+  .firma-tabla-img {
+    max-height: 13.5px !important;
+    max-width: 60px !important;
+    margin: 0 auto !important;
+    display: block !important;
+    filter: contrast(150%) !important;
+  }
+  .sin-firma-linea {
+    width: 40px !important;
+    height: 1px !important;
+    margin: 5px auto 0 auto !important;
+    border-bottom: 1px dashed #94a3b8 !important;
+  }
+
+  /* Firmas Institucionales al Pie */
+  .hoja-folio-imprimible .firmas {
+    margin-top: 4px !important;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-around !important;
+    align-items: flex-end !important;
+    gap: 2rem !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+  .hoja-folio-imprimible .firma-bloque-item {
+    max-width: 200px !important;
+    margin: 0 !important;
+    text-align: center !important;
+  }
+  .hoja-folio-imprimible .firma-preview-espacio {
+    min-height: 18px !important;
+    height: 18px !important;
+  }
+  .hoja-folio-imprimible .firma-espacio-blanco {
+    height: 15px !important;
+  }
+  .hoja-folio-imprimible .firma-render-img {
+    max-height: 18px !important;
+    filter: contrast(150%) !important;
+  }
+  .hoja-folio-imprimible .firma-linea-separador {
+    width: 170px !important;
+    margin: 2px auto !important;
+    border-top: 1px solid #1e293b !important;
+  }
+  .hoja-folio-imprimible .firma-texto-label {
+    font-size: 7pt !important;
+    line-height: 1.15 !important;
+    font-weight: 600 !important;
+  }
+
+  .guia-preguntas-encuesta {
+    margin-top: 2px !important;
+    padding: 2px 4px !important;
+    font-size: 6pt !important;
+    border: 1px solid #1e293b !important;
+  }
+  .lista-preguntas-guia {
+    gap: 1px 6px !important;
+    font-size: 6pt !important;
+  }
+  .nota {
+    font-size: 6.5pt !important;
+    margin-top: 2px !important;
+    line-height: 1.1 !important;
+  }
 }
