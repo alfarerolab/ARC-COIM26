@@ -8,6 +8,9 @@
 ini_set('display_errors', '0');
 error_reporting(E_ALL);
 
+// Configurar zona horaria oficial de Colombia (UTC-5)
+date_default_timezone_set('America/Bogota');
+
 // ─── CONFIGURACIÓN DE BASE DE DATOS Y CREDENCIALES ─────────────────────────
 define('DB_HOST', 'localhost');
 define('DB_NAME', 'fundaci3_armada');
@@ -49,6 +52,8 @@ try {
             PDO::ATTR_EMULATE_PREPARES   => false,
         ]
     );
+    // Sincronizar la zona horaria de la sesión MySQL a Colombia (-05:00)
+    $pdo->exec("SET time_zone = '-05:00'");
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode(['error' => 'Error de conexión con la base de datos: ' . $e->getMessage()]);
@@ -109,6 +114,11 @@ function handleRegistros(string $method, PDO $pdo): void
         foreach ($rows as &$r) {
             if (is_string($r['datos'])) {
                 $r['datos'] = json_decode($r['datos'], true);
+            }
+            // Asegurar formato ISO 8601 con zona horaria de Colombia (-05:00)
+            if (!empty($r['creado'])) {
+                $dt = new DateTime($r['creado'], new DateTimeZone('America/Bogota'));
+                $r['creado'] = $dt->format(DateTime::ATOM);
             }
         }
         echo json_encode($rows);
