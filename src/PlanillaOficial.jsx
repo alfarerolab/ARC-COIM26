@@ -34,7 +34,9 @@ export default function PlanillaOficial({ tipo, registros, onVolver }) {
           suboficial: d.suboficial || '—',
           fecha: d.fecha || '—',
           promedio: promInd,
-          firma: d.firmaEncuestado || '',
+          firma: d.firmaEncuestado || d.firma || '',
+          mejoras: d.abierta?.mejoras || d.mejoras || '—',
+          mensaje: d.abierta?.mensaje || d.mensaje || '—',
           calif: d.calif || {},
           si: d.si || {},
           ...d,
@@ -136,16 +138,17 @@ export default function PlanillaOficial({ tipo, registros, onVolver }) {
     return folios[idx] ? [folios[idx]] : folios;
   }, [folios, folioSeleccionado]);
 
-  // Promedios por pregunta para Encuesta
+  // Promedios por pregunta para Encuesta (ajustado a las preguntas de escala del formato actual)
   const promediosPreguntas = useMemo(() => {
     if (tipo !== 'encuesta') return [];
-    return Array.from({ length: 10 }, (_, i) => {
+    const totalPreguntas = f.escala?.length || 5;
+    return Array.from({ length: totalPreguntas }, (_, i) => {
       const vals = personasFiltradas
         .map((p) => Number(p.calif?.[i]))
         .filter((v) => !isNaN(v) && v > 0);
       return vals.length > 0 ? (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1) : '—';
     });
-  }, [personasFiltradas, tipo]);
+  }, [personasFiltradas, tipo, f.escala]);
 
   // Promedio total para Encuesta
   const promedioTotalEncuesta = useMemo(() => {
@@ -447,6 +450,9 @@ export default function PlanillaOficial({ tipo, registros, onVolver }) {
                             <td className="centro" style={{ color: 'var(--marino)', fontWeight: '800' }}>
                               {promedioTotalEncuesta}
                             </td>
+                            {/* Celdas para las columnas abiertas (mejoras y mensaje) y firma */}
+                            <td className="centro">—</td>
+                            <td className="centro">—</td>
                             <td className="centro">—</td>
                           </tr>
                         </tfoot>
