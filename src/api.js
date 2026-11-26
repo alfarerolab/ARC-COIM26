@@ -2,6 +2,9 @@ const K = 'clave';
 const KA_TOKEN = 'admin_token';
 const KA_USER = 'admin_usuario';
 
+// Si existe VITE_API_URL (configurada en Vercel), úsala; si no, usa rutas relativas (Vercel Functions / local)
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
+
 export const getClave = () => sessionStorage.getItem(K) || '';
 export const setClave = (v) => (v ? sessionStorage.setItem(K, v) : sessionStorage.removeItem(K));
 
@@ -38,11 +41,11 @@ async function req(url, opt = {}) {
 }
 
 export const api = {
-  listar: (tipo = 'todos') => req(`/api/registros?tipo=${tipo}`),
-  crear: (tipo, datos) => req('/api/registros', { method: 'POST', body: JSON.stringify({ tipo, datos }) }),
-  borrar: (id) => req(`/api/registros?id=${id}`, { method: 'DELETE' }),
+  listar: (tipo = 'todos') => req(`${API_BASE}/registros?tipo=${tipo}`),
+  crear: (tipo, datos) => req(`${API_BASE}/registros`, { method: 'POST', body: JSON.stringify({ tipo, datos }) }),
+  borrar: (id) => req(`${API_BASE}/registros?id=${id}`, { method: 'DELETE' }),
   validarAdmin: async (usuario, clave) => {
-    const r = await fetch('/api/admin-auth', {
+    const r = await fetch(`${API_BASE}/admin-auth`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ usuario, clave }),

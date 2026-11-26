@@ -7,6 +7,7 @@ const vacio = (f) => ({
   ...Object.fromEntries(f.campos?.map((c) => [c.k, '']) || []),
   calif: {},
   si: {},
+  abierta: {},
   firmaEncuestado: '',
   firma: '',
 });
@@ -220,7 +221,7 @@ export default function Formulario({ tipo, f, datos, soloLectura, onGuardado }) 
           </section>
         )}
 
-        {/* Preguntas Sí/No (Exclusivas para Encuesta) */}
+        {/* Preguntas Sí/No (para encuestas que las tengan) */}
         {f.siNo && (
           <section className="seccion-bloque">
             <h3>{f.siNoTitulo}</h3>
@@ -256,6 +257,31 @@ export default function Formulario({ tipo, f, datos, soloLectura, onGuardado }) 
                     />
                   )}
                 </div>
+              </div>
+            ))}
+          </section>
+        )}
+
+        {/* Preguntas Abiertas (P6 y P7 de la nueva encuesta) */}
+        {f.abiertas && (
+          <section className="seccion-bloque">
+            <h3>{f.abiertasTitulo}</h3>
+            <p className="ayuda">{f.abiertasAyuda}</p>
+            {f.abiertas.map((preg, i) => (
+              <div key={preg.k} className="sino">
+                <p><strong>{i + 6}.</strong> {preg.label}</p>
+                <textarea
+                  className="textarea-abierta"
+                  rows={4}
+                  placeholder={preg.placeholder}
+                  value={d.abierta?.[preg.k] || ''}
+                  onChange={(e) =>
+                    setD((x) => ({
+                      ...x,
+                      abierta: { ...x.abierta, [preg.k]: e.target.value },
+                    }))
+                  }
+                />
               </div>
             ))}
           </section>

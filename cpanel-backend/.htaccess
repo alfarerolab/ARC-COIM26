@@ -1,0 +1,23 @@
+# Protección total contra inyecciones y accesos directos
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /arc-api/
+
+    # Si solicitan la carpeta o archivo directo, no redirigir
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Enrutamiento hacia api.php manteniendo query parameters
+    RewriteRule ^registros$ api.php [L,QSA]
+    RewriteRule ^admin-auth$ api.php [L,QSA]
+</IfModule>
+
+# Bloquear listado de directorios
+Options -Indexes
+
+# Seguridad: Bloquear acceso a archivos sensibles
+<FilesMatch "^\.|\.sql$|\.env$|\.log$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>

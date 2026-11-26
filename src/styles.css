@@ -998,3 +998,20 @@ h3 { color: var(--marino); margin: 1.4rem 0 .2rem; }
     line-height: 1.1 !important;
   }
 }
+
+/* Preguntas abiertas */
+.textarea-abierta {
+  font: inherit;
+  width: 100%;
+  padding: .6rem .7rem;
+  border: 1px solid var(--linea);
+  border-radius: 3px;
+  background: #fff;
+  resize: vertical;
+  margin-top: .4rem;
+  line-height: 1.5;
+}
+.textarea-abierta:focus-visible {
+  outline: 3px solid #e0a82e;
+  outline-offset: 1px;
+}

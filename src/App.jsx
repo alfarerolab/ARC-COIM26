@@ -25,9 +25,11 @@ export default function App() {
             </div>
           </div>
 
-          {/* Menú de Formatos Interactivo (Pills Dinámicos) */}
+          {/* Menú de Formatos Interactivo (Pills Dinámicos) — solo formatos públicos */}
           <nav className="navbar-tabs" aria-label="Formatos Institucionales">
-            {Object.entries(FORMATOS).map(([k, v]) => {
+            {Object.entries(FORMATOS)
+              .filter(([, v]) => !v.soloAdmin)
+              .map(([k, v]) => {
               const estaActivo = k === tipo;
               return (
                 <button

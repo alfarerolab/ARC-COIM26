@@ -4,7 +4,7 @@ export const FORMATOS = {
   encuesta: {
     tab: 'Encuesta de satisfacción',
     titulo: 'ENCUESTA DE SATISFACCIÓN',
-    subtitulo: 'CAMPAÑAS NAVEGANDO – CAMPAÑAS BINACIONALES Y JORNADA DE APOYO AL DESARROLLO (CAD-CADB-JAD)',
+    subtitulo: 'JORNADA DE BIENESTAR Y DESARROLLO — ACCIÓN INTEGRAL',
     proceso: 'Acción Integral',
     autoridad: 'JACID',
     codigo: 'ACCIN-FT-022-JACID-V02',
@@ -17,31 +17,32 @@ export const FORMATOS = {
     ],
     escalaTitulo: 'Satisfacción del beneficiario',
     escalaAyuda:
-      'Marque la calificación que considere pertinente de acuerdo a la experiencia personal, producto de las actividades de Acción Integral lideradas por la Armada Nacional.',
+      'Marque la calificación que considere pertinente de acuerdo a la experiencia personal vivida durante la jornada de bienestar y desarrollo liderada por la Armada Nacional.',
     niveles: ['Malo', 'Regular', 'Aceptable', 'Bueno', 'Excelente'],
     escala: [
-      '¿Qué tal fue la calidad en la atención que me brindaron los profesionales de la salud durante la jornada?',
-      '¿Cómo califica la articulación que realiza la Armada Nacional para apoyar los proyectos de infraestructura, ambientales y productivos en mi región?',
-      'Las actividades que la Armada Nacional realiza para preservar el medio ambiente son…',
-      'Las actividades que la Armada Nacional realiza para prevenir que Grupos Armados recluten a nuestros Niños, Niñas, Adolescentes y Jóvenes (NNAJ) en mi comunidad son…',
-      '¿Cómo califica el impacto de las actividades en su comunidad?',
-      'Las actividades de integración comunitaria que realiza la Armada Nacional en mi localidad son…',
-      'Considera que la colaboración entre la sociedad civil y las entidades públicas en estos proyectos es…',
-      '¿Cómo califica la vinculación de las entidades de Gobernación, Alcaldía e Inspecciones con las actividades de la Armada Nacional?',
-      '¿Cómo evaluaría el efecto a largo plazo de estas actividades en su comunidad?',
-      '¿Qué tan bien cree que se están abordando los problemas de inestabilidad en su comunidad?',
+      '¿Cómo califica su nivel de satisfacción general con la jornada de bienestar y desarrollo, teniendo en cuenta los servicios de salud, odontología, salud mental, empleabilidad, finanzas personales, integración, recreación y alimentación recibida?',
+      '¿Considera que las actividades y los servicios ofrecidos durante la jornada contribuyeron positivamente a su bienestar físico, emocional y personal?',
+      '¿Qué tan útiles y enriquecedoras fueron las orientaciones brindadas por los profesionales en las diferentes estaciones, especialmente en temas de salud, salud mental, empleabilidad y finanzas personales?',
+      '¿Cómo califica los espacios de integración, recreación, rumbaterapia, juegos, rifas y entrega de premios, como parte de las actividades destinadas a compartir, disfrutar y salir de la rutina?',
+      '¿Considera que esta jornada fue un aporte significativo para su calidad de vida y su proceso de preparación para el retorno a la vida civil?',
     ],
-    siNoTitulo: 'Oportunidades de mejora',
-    siNoAyuda:
-      'Apreciaciones personales sobre acciones que deben ser reforzadas o eliminadas del plan de actividades que desarrolla la Armada Nacional en su comunidad. Si su respuesta es Sí, por favor justifíquela.',
-    siNo: [
-      '¿Considera inapropiada o innecesaria alguna actividad de integración comunitaria llevada a cabo por la Armada Nacional en su comunidad?',
-      '¿Cree que falta llevar alguna especialidad médica en las Jornadas de Apoyo al Desarrollo llevadas a cabo en su comunidad?',
-      '¿Percibe que alguna actividad (integración comunitaria, proyectos, gestión ambiental, infraestructura, etc.) o especialidad médica dentro de las Jornadas de Apoyo al Desarrollo debe ser fortalecida para atender las principales necesidades de su comunidad?',
-      '¿Qué tipo de actividad de Acción Integral ha participado? (Operaciones de Seguridad, Desarrollo Comunitario, Asistencia Humanitaria, Programas de Educación, Protección del Medio Ambiente, Otro)',
-      '¿Qué aspectos considera que son los más positivos de las actividades realizadas por la Armada? (Seguridad, Ayuda humanitaria, Educación, Desarrollo económico, Protección ambiental, Otro)',
-      '¿Qué mejoras sugeriría para las actividades de Acción Integral?',
-      '¿Hay algún otro comentario que le gustaría hacer sobre la Armada Nacional y su trabajo en su comunidad?',
+    // Preguntas abiertas (texto libre) — se guardan en d.abierta
+    abiertasTitulo: 'Observaciones y apreciación personal',
+    abiertasAyuda:
+      'Comparta sus opiniones, sugerencias y reflexiones. Su respuesta es muy importante para nosotros.',
+    abiertas: [
+      {
+        k: 'mejoras',
+        label:
+          'Desde su experiencia, ¿qué aspectos considera que podríamos mejorar o qué otras actividades, servicios o iniciativas le gustaría que incluyéramos en futuras jornadas?',
+        placeholder: 'Escriba aquí sus sugerencias…',
+      },
+      {
+        k: 'mensaje',
+        label:
+          '¿Qué mensaje, sugerencia o reflexión quisiera compartirnos sobre esta jornada? Su opinión es muy importante para nosotros, porque nos permite conocer cómo vivió esta experiencia y seguir trabajando por su bienestar y desarrollo integral.',
+        placeholder: 'Escriba aquí su mensaje o reflexión…',
+      },
     ],
     firmas: ['Firma encuestado', 'Firma Suboficial de Acción Integral y Desarrollo'],
     tablaConsolidada: {
@@ -52,12 +53,9 @@ export const FORMATOS = {
         { k: 'p3', label: 'P3' },
         { k: 'p4', label: 'P4' },
         { k: 'p5', label: 'P5' },
-        { k: 'p6', label: 'P6' },
-        { k: 'p7', label: 'P7' },
-        { k: 'p8', label: 'P8' },
-        { k: 'p9', label: 'P9' },
-        { k: 'p10', label: 'P10' },
         { k: 'promedio', label: 'Promedio' },
+        { k: 'mejoras', label: 'P6 Mejoras' },
+        { k: 'mensaje', label: 'P7 Mensaje' },
         { k: 'firma', label: 'Firma digital' },
       ],
     },
@@ -65,6 +63,7 @@ export const FORMATOS = {
 
   asistencia: {
     tab: 'Listado de asistencia',
+    soloAdmin: true,
     titulo: 'LISTADO DE ASISTENCIA',
     proceso: 'Documento Institucional',
     autoridad: 'JPLAN',
@@ -131,6 +130,7 @@ export const FORMATOS = {
 
   caracterizacion: {
     tab: 'Caracterización del personal',
+    soloAdmin: true,
     titulo: 'CARACTERIZACIÓN DEL PERSONAL PARA LAS JORNADAS O CAMPAÑAS DE APOYO AL DESARROLLO',
     proceso: 'Acción Integral',
     autoridad: 'JACID',
