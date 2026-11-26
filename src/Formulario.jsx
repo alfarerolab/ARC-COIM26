@@ -26,20 +26,23 @@ export default function Formulario({ tipo, f, datos, soloLectura, onGuardado }) 
     setNotificacion(null);
     try {
       await api.crear(tipo, d);
+      const nombreEncuestado = d.encuestado || d.nombre || '';
       setD(vacio(f));
       setNotificacion({
         tipo: 'exito',
-        titulo: '¡Registro guardado con éxito!',
-        mensaje: 'El formulario se ha reiniciado automáticamente y está listo para diligenciar el siguiente.',
+        titulo: '¡Encuesta enviada con éxito!',
+        mensaje: nombreEncuestado 
+          ? `Muchas gracias ${nombreEncuestado}, su respuesta ha sido registrada exitosamente.`
+          : 'Muchas gracias por su participación, su encuesta ha sido registrada exitosamente en el sistema.',
       });
       window.scrollTo({ top: 0, behavior: 'smooth' });
       onGuardado?.();
-      setTimeout(() => setNotificacion(null), 5000);
+      setTimeout(() => setNotificacion(null), 8000);
     } catch (err) {
       setNotificacion({
         tipo: 'error',
-        titulo: 'No se pudo guardar el registro',
-        mensaje: err.message,
+        titulo: 'No se pudo enviar la encuesta',
+        mensaje: err.message || 'Ocurrió un error al intentar registrar la información.',
       });
     } finally {
       setEnviando(false);
@@ -50,6 +53,7 @@ export default function Formulario({ tipo, f, datos, soloLectura, onGuardado }) 
     <form className="hoja" onSubmit={guardar}>
       {notificacion && (
         <div className={`toast-banner toast-${notificacion.tipo} no-print`} role="alert">
+          <span className="toast-icon">{notificacion.tipo === 'exito' ? '✅' : '⚠️'}</span>
           <div className="toast-text">
             <strong>{notificacion.titulo}</strong>
             <p>{notificacion.mensaje}</p>
