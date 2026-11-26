@@ -27,17 +27,8 @@ export default function Formulario({ tipo, f, datos, soloLectura, onGuardado }) 
     try {
       await api.crear(tipo, d);
       const nombreEncuestado = d.encuestado || d.nombre || '';
+      onGuardado?.({ nombre: nombreEncuestado });
       setD(vacio(f));
-      setNotificacion({
-        tipo: 'exito',
-        titulo: '¡Encuesta enviada con éxito!',
-        mensaje: nombreEncuestado 
-          ? `Muchas gracias ${nombreEncuestado}, su respuesta ha sido registrada exitosamente.`
-          : 'Muchas gracias por su participación, su encuesta ha sido registrada exitosamente en el sistema.',
-      });
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      onGuardado?.();
-      setTimeout(() => setNotificacion(null), 8000);
     } catch (err) {
       setNotificacion({
         tipo: 'error',

@@ -6,8 +6,22 @@ import logoArmada from './images/image.png';
 export default function App() {
   const [tipo, setTipo] = useState('encuesta');
   const [version, setVersion] = useState(0);
+  const [notificacion, setNotificacion] = useState(null);
 
   const f = FORMATOS[tipo];
+
+  const handleGuardado = (info) => {
+    setVersion((v) => v + 1);
+    setNotificacion({
+      tipo: 'exito',
+      titulo: '¡Encuesta enviada con éxito!',
+      mensaje: info?.nombre
+        ? `Muchas gracias ${info.nombre}, su respuesta ha sido registrada exitosamente.`
+        : 'Muchas gracias por su participación, su encuesta ha sido registrada exitosamente.',
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setTimeout(() => setNotificacion(null), 8000);
+  };
 
   return (
     <div className="app-layout">
@@ -54,11 +68,33 @@ export default function App() {
 
       {/* Formulario principal */}
       <main className="main-content">
+        {notificacion && (
+          <div
+            className={`toast-banner toast-${notificacion.tipo} no-print`}
+            style={{ maxWidth: '820px', margin: '1rem auto 1.5rem auto' }}
+            role="alert"
+          >
+            <span className="toast-icon">✅</span>
+            <div className="toast-text">
+              <strong>{notificacion.titulo}</strong>
+              <p>{notificacion.mensaje}</p>
+            </div>
+            <button
+              type="button"
+              className="toast-close-btn"
+              onClick={() => setNotificacion(null)}
+              title="Cerrar notificación"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
         <Formulario
           key={tipo + '-' + version}
           tipo={tipo}
           f={f}
-          onGuardado={() => setVersion((v) => v + 1)}
+          onGuardado={handleGuardado}
         />
       </main>
     </div>
