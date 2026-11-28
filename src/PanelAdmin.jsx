@@ -1,7 +1,8 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { FORMATOS } from './formatos.js';
 import Formulario from './Formulario.jsx';
 import PlanillaOficial from './PlanillaOficial.jsx';
+import DashboardEncuestas from './DashboardEncuestas.jsx';
 import { api } from './api.js';
 import logoArmada from './images/image.png';
 
@@ -135,23 +136,64 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
   const [busqueda, setBusqueda] = useState('');
   const [registroDetalle, setRegistroDetalle] = useState(null);
   const [vistaPlanilla, setVistaPlanilla] = useState(null);
+  const enVueloRef = useRef(false);
 
-  const cargarRegistros = async () => {
-    setCargando(true);
-    setError('');
+  const cargarRegistros = useCallback(async ({ silencioso = false } = {}) => {
+    if (enVueloRef.current) return;
+    enVueloRef.current = true;
+    if (!silencioso) {
+      setCargando(true);
+      setError('');
+    }
     try {
       const data = await api.listar('todos');
       setRegistros(Array.isArray(data) ? data : []);
+      if (silencioso) setError('');
     } catch (err) {
-      setError(err.message || 'Error al cargar los registros');
+      if (!silencioso) {
+        setError(err.message || 'Error al cargar los registros');
+      }
     } finally {
-      setCargando(false);
+      enVueloRef.current = false;
+      if (!silencioso) setCargando(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     cargarRegistros();
-  }, []);
+  }, [cargarRegistros]);
+
+  // Actualización automática en segundo plano (polling cada 5s + BroadcastChannel entre pestañas)
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (!document.hidden && !vistaPlanilla && !registroDetalle) {
+        cargarRegistros({ silencioso: true });
+      }
+    }, 5000);
+
+    const onVisibilidad = () => {
+      if (!document.hidden) {
+        cargarRegistros({ silencioso: true });
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibilidad);
+
+    let canal;
+    try {
+      canal = new BroadcastChannel('arc-registros');
+      canal.onmessage = () => {
+        cargarRegistros({ silencioso: true });
+      };
+    } catch {
+      // Sin soporte de BroadcastChannel
+    }
+
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener('visibilitychange', onVisibilidad);
+      if (canal) canal.close();
+    };
+  }, [vistaPlanilla, registroDetalle, cargarRegistros]);
 
   const borrarRegistro = async (id, e) => {
     e.stopPropagation();
@@ -164,6 +206,11 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
       alert(`Error al borrar: ${err.message}`);
     }
   };
+
+  const encuestasSolo = useMemo(
+    () => registros.filter((r) => r.tipo === 'encuesta'),
+    [registros]
+  );
 
   // Métricas
   const metricas = useMemo(() => {
@@ -318,7 +365,7 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
           </div>
         </div>
         <div className="admin-header-actions no-print">
-          <button className="sec" onClick={cargarRegistros} title="Recargar datos">
+          <button className="sec" onClick={() => cargarRegistros()} title="Recargar datos">
             Actualizar
           </button>
           <button className="sec" onClick={() => (window.location.href = '/')} title="Ver el portal público de formatos">
@@ -381,6 +428,9 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
           </div>
         </div>
       </section>
+
+      {/* Dashboard de Gráficas de Encuestas */}
+      {!cargando && <DashboardEncuestas encuestas={encuestasSolo} />}
 
       {/* Controles de Búsqueda, Filtros y Planillas */}
       <section className="admin-toolbar">

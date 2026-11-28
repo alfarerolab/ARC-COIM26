@@ -26,6 +26,13 @@ export default function Formulario({ tipo, f, datos, soloLectura, onGuardado }) 
     setNotificacion(null);
     try {
       await api.crear(tipo, d);
+      try {
+        const ch = new BroadcastChannel('arc-registros');
+        ch.postMessage({ tipo, ts: Date.now() });
+        ch.close();
+      } catch {
+        // Navegador sin BroadcastChannel: el polling del dashboard lo sincroniza automáticamente
+      }
       const nombreEncuestado = d.encuestado || d.nombre || '';
       onGuardado?.({ nombre: nombreEncuestado });
       setD(vacio(f));
