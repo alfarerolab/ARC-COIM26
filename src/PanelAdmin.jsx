@@ -195,9 +195,9 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
     };
   }, [vistaPlanilla, registroDetalle, cargarRegistros]);
 
-  const borrarRegistro = async (id, e) => {
+  const borrarRegistro = async (id, numero, e) => {
     e.stopPropagation();
-    if (!confirm(`¿Está seguro de eliminar el registro #${id} de forma permanente?`)) return;
+    if (!confirm(`¿Está seguro de eliminar el registro #${numero} de forma permanente?`)) return;
     try {
       await api.borrar(id);
       setRegistros((prev) => prev.filter((r) => r.id !== id));
@@ -211,6 +211,21 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
     () => registros.filter((r) => r.tipo === 'encuesta'),
     [registros]
   );
+
+  // Numeración secuencial por tipo (1..N según orden cronológico, independiente del ID de BD)
+  const numeroPorId = useMemo(() => {
+    const mapa = new Map();
+    const contadores = {};
+    const ordenCronologico = [...registros].sort((a, b) => {
+      const diff = new Date(a.creado) - new Date(b.creado);
+      return diff !== 0 ? diff : (a.id || 0) - (b.id || 0);
+    });
+    ordenCronologico.forEach((r) => {
+      contadores[r.tipo] = (contadores[r.tipo] || 0) + 1;
+      mapa.set(r.id, contadores[r.tipo]);
+    });
+    return mapa;
+  }, [registros]);
 
   // Métricas
   const metricas = useMemo(() => {
@@ -344,7 +359,7 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
           </button>
           <div className="admin-detalle-meta">
             <span className={`badge-tipo badge-${registroDetalle.tipo}`}>{f.tab}</span>
-            <small>ID #{registroDetalle.id} • {new Date(registroDetalle.creado).toLocaleString('es-CO')}</small>
+            <small>No. #{numeroPorId.get(registroDetalle.id) ?? registroDetalle.id} • {new Date(registroDetalle.creado).toLocaleString('es-CO')}</small>
           </div>
           <button onClick={() => window.print()}>Imprimir o guardar PDF</button>
         </div>
@@ -521,7 +536,7 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
               <table className="admin-tabla">
                 <thead>
                   <tr>
-                    <th>ID</th>
+                    <th>No.</th>
                     <th>Tipo de Formato</th>
                     <th>Persona / Encuestado</th>
                     <th>Detalles clave</th>
@@ -561,9 +576,11 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
                       }
                     }
 
+                    const numeroRegistro = numeroPorId.get(r.id) ?? r.id;
+
                     return (
                       <tr key={r.id} onClick={() => setRegistroDetalle(r)} className="admin-fila-clickable">
-                        <td className="admin-td-id">#{r.id}</td>
+                        <td className="admin-td-id">#{numeroRegistro}</td>
                         <td>
                           <span className={`badge-tipo badge-${r.tipo}`}>
                             {f.tab || r.tipo}
@@ -590,7 +607,7 @@ export default function PanelAdmin({ onVolver, onCerrarAdmin }) {
                             </button>
                             <button
                               className="peligro admin-btn-action"
-                              onClick={(e) => borrarRegistro(r.id, e)}
+                              onClick={(e) => borrarRegistro(r.id, numeroRegistro, e)}
                               title="Eliminar permanentemente"
                             >
                               Eliminar

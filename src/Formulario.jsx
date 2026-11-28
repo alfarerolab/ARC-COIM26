@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { api } from './api.js';
 import logoArmada from './images/image.png';
 import FirmaCanvas from './FirmaCanvas.jsx';
@@ -16,12 +16,38 @@ export default function Formulario({ tipo, f, datos, soloLectura, onGuardado }) 
   const [d, setD] = useState(datos || vacio(f));
   const [notificacion, setNotificacion] = useState(null);
   const [enviando, setEnviando] = useState(false);
+  const [errorNombre, setErrorNombre] = useState(false);
+  const encuestadoRef = useRef(null);
 
-  const set = (k, v) => setD((x) => ({ ...x, [k]: v }));
+  const esEncuestaActiva = !soloLectura && tipo === 'encuesta';
+  const nombreValido = String(d.encuestado || '').trim().length > 0;
+
+  const exigirNombre = (e) => {
+    if (!esEncuestaActiva || nombreValido) return false;
+    if (e) {
+      if (e.cancelable) e.preventDefault?.();
+      e.stopPropagation?.();
+    }
+    setErrorNombre(true);
+    const inputEl = encuestadoRef.current;
+    if (inputEl) {
+      inputEl.focus({ preventScroll: true });
+      inputEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    return true;
+  };
+
+  const set = (k, v) => {
+    setD((x) => ({ ...x, [k]: v }));
+    if (k === 'encuestado' && String(v || '').trim().length > 0) {
+      setErrorNombre(false);
+    }
+  };
   const setSi = (i, parte) => setD((x) => ({ ...x, si: { ...x.si, [i]: { ...x.si[i], ...parte } } }));
 
   async function guardar(e) {
     e.preventDefault();
+    if (exigirNombre(e)) return;
     setEnviando(true);
     setNotificacion(null);
     try {
@@ -123,26 +149,59 @@ export default function Formulario({ tipo, f, datos, soloLectura, onGuardado }) 
         ) : (
           /* Renderizado tradicional para Encuesta */
           <div className="campos">
-            {f.campos.map((c) => (
-              <label key={c.k} className={c.span === 2 ? 'ancho' : ''}>
-                {c.label}
-                {c.type === 'select' ? (
-                  <select value={d[c.k] || ''} onChange={(e) => set(c.k, e.target.value)}>
-                    <option value="">Seleccione…</option>
-                    {c.options.map((o) => (
-                      <option key={o} value={o}>{o}</option>
-                    ))}
-                  </select>
-                ) : (
-                  <input
-                    type={c.type || 'text'}
-                    placeholder={c.placeholder || ''}
-                    value={d[c.k] || ''}
-                    onChange={(e) => set(c.k, e.target.value)}
-                  />
-                )}
-              </label>
-            ))}
+            {f.campos.map((c) => {
+              const esCampoNombre = esEncuestaActiva && c.k === 'encuestado';
+              const bloquearCampo = esEncuestaActiva && c.k !== 'fecha' && c.k !== 'encuestado' && !nombreValido;
+              return (
+                <label key={c.k} className={c.span === 2 ? 'ancho' : ''}>
+                  <span>
+                    {c.label}
+                    {c.required && <span className="campo-obligatorio" aria-hidden="true"> *</span>}
+                  </span>
+                  {c.type === 'select' ? (
+                    <select value={d[c.k] || ''} onChange={(e) => set(c.k, e.target.value)}>
+                      <option value="">Seleccione…</option>
+                      {c.options.map((o) => (
+                        <option key={o} value={o}>{o}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      ref={esCampoNombre ? encuestadoRef : undefined}
+                      type={c.type || 'text'}
+                      placeholder={c.placeholder || (esCampoNombre ? 'Escriba su nombre completo (obligatorio)' : '')}
+                      required={!!c.required}
+                      aria-required={c.required ? 'true' : undefined}
+                      aria-invalid={esCampoNombre && errorNombre ? 'true' : undefined}
+                      className={esCampoNombre && errorNombre ? 'input-error-obligatorio' : undefined}
+                      value={d[c.k] || ''}
+                      readOnly={bloquearCampo}
+                      onKeyDown={
+                        esCampoNombre
+                          ? (e) => {
+                              if ((e.key === 'Tab' && !e.shiftKey) || e.key === 'Enter') {
+                                exigirNombre(e);
+                              }
+                            }
+                          : undefined
+                      }
+                      onMouseDown={bloquearCampo ? exigirNombre : undefined}
+                      onClick={bloquearCampo ? exigirNombre : undefined}
+                      onFocus={bloquearCampo ? exigirNombre : undefined}
+                      onChange={(e) => {
+                        if (bloquearCampo) return;
+                        set(c.k, e.target.value);
+                      }}
+                    />
+                  )}
+                  {esCampoNombre && errorNombre && (
+                    <span className="campo-error-msg" role="alert">
+                      El nombre completo es obligatorio para continuar con la encuesta.
+                    </span>
+                  )}
+                </label>
+              );
+            })}
           </div>
         )}
 
@@ -185,7 +244,12 @@ export default function Formulario({ tipo, f, datos, soloLectura, onGuardado }) 
 
         {/* Escala de Satisfacción (Exclusiva para Encuesta) */}
         {f.escala && (
-          <section className="seccion-bloque">
+          <section
+            className={`seccion-bloque ${esEncuestaActiva && !nombreValido ? 'bloque-pendiente-nombre' : ''}`}
+            onMouseDownCapture={esEncuestaActiva && !nombreValido ? exigirNombre : undefined}
+            onClickCapture={esEncuestaActiva && !nombreValido ? exigirNombre : undefined}
+            onFocusCapture={esEncuestaActiva && !nombreValido ? exigirNombre : undefined}
+          >
             <h3>{f.escalaTitulo}</h3>
             <p className="ayuda">{f.escalaAyuda}</p>
               <div className="tabla-scroll escala-desktop-table">
@@ -211,7 +275,10 @@ export default function Formulario({ tipo, f, datos, soloLectura, onGuardado }) 
                               name={`c${i}`}
                               aria-label={`Pregunta ${i + 1}: ${n + 1}`}
                               checked={d.calif?.[i] === n + 1}
-                              onChange={() => setD((x) => ({ ...x, calif: { ...x.calif, [i]: n + 1 } }))}
+                              onChange={(e) => {
+                                if (exigirNombre(e)) return;
+                                setD((x) => ({ ...x, calif: { ...x.calif, [i]: n + 1 } }));
+                              }}
                             />
                           </td>
                         ))}
@@ -242,7 +309,10 @@ export default function Formulario({ tipo, f, datos, soloLectura, onGuardado }) 
                               type="radio"
                               name={`cm${i}`}
                               checked={seleccionado}
-                              onChange={() => setD((x) => ({ ...x, calif: { ...x.calif, [i]: valor } }))}
+                              onChange={(e) => {
+                                if (exigirNombre(e)) return;
+                                setD((x) => ({ ...x, calif: { ...x.calif, [i]: valor } }));
+                              }}
                             />
                             <span className="escala-opcion-num">{valor}</span>
                             <span className="escala-opcion-txt">{nivel}</span>
@@ -299,7 +369,12 @@ export default function Formulario({ tipo, f, datos, soloLectura, onGuardado }) 
 
         {/* Preguntas Abiertas (P6 y P7 de la nueva encuesta) */}
         {f.abiertas && (
-          <section className="seccion-bloque">
+          <section
+            className={`seccion-bloque ${esEncuestaActiva && !nombreValido ? 'bloque-pendiente-nombre' : ''}`}
+            onMouseDownCapture={esEncuestaActiva && !nombreValido ? exigirNombre : undefined}
+            onClickCapture={esEncuestaActiva && !nombreValido ? exigirNombre : undefined}
+            onFocusCapture={esEncuestaActiva && !nombreValido ? exigirNombre : undefined}
+          >
             <h3>{f.abiertasTitulo}</h3>
             <p className="ayuda">{f.abiertasAyuda}</p>
             {f.abiertas.map((preg, i) => (
@@ -309,13 +384,15 @@ export default function Formulario({ tipo, f, datos, soloLectura, onGuardado }) 
                   className="textarea-abierta"
                   rows={4}
                   placeholder={preg.placeholder}
+                  readOnly={esEncuestaActiva && !nombreValido}
                   value={d.abierta?.[preg.k] || ''}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    if (exigirNombre(e)) return;
                     setD((x) => ({
                       ...x,
                       abierta: { ...x.abierta, [preg.k]: e.target.value },
-                    }))
-                  }
+                    }));
+                  }}
                 />
               </div>
             ))}
@@ -328,7 +405,12 @@ export default function Formulario({ tipo, f, datos, soloLectura, onGuardado }) 
 
       {/* Firmas institucionales (Encuesta y Caracterización) */}
       {f.firmas && (
-        <div className="firmas">
+        <div
+          className={`firmas ${esEncuestaActiva && !nombreValido ? 'bloque-pendiente-nombre' : ''}`}
+          onMouseDownCapture={esEncuestaActiva && !nombreValido ? exigirNombre : undefined}
+          onClickCapture={esEncuestaActiva && !nombreValido ? exigirNombre : undefined}
+          onFocusCapture={esEncuestaActiva && !nombreValido ? exigirNombre : undefined}
+        >
           {f.firmas.map((x) => {
             const esFirmaTactilEncuestado = tipo === 'encuesta' && x.toLowerCase().includes('encuestado');
 

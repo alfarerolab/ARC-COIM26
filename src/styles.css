@@ -2042,7 +2042,27 @@ h3 {
     line-height: 1.5;
   }
 
-  .textarea-abierta:focus-visible {
+  .campo-obligatorio {
+  color: var(--rojo);
+  font-weight: 700;
+}
+
+.input-error-obligatorio {
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.16);
+}
+
+.campo-error-msg {
+  color: #b91c1c;
+  font-size: .78rem;
+  font-weight: 600;
+}
+
+.bloque-pendiente-nombre {
+  opacity: .72;
+}
+
+.textarea-abierta:focus-visible {
     outline: 3px solid #e0a82e;
     outline-offset: 1px;
   }

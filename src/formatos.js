@@ -12,7 +12,7 @@ export const FORMATOS = {
     resumen: 'encuestado',
     campos: [
       { k: 'fecha', label: 'Fecha', type: 'date' },
-      { k: 'encuestado', label: 'Encuestado (nombre completo)' },
+      { k: 'encuestado', label: 'Encuestado (nombre completo)', required: true },
       { k: 'suboficial', label: 'Suboficial de Acción Integral y Desarrollo (grado / unidad)' },
     ],
     escalaTitulo: 'Satisfacción del beneficiario',
