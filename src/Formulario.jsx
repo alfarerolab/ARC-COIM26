@@ -188,38 +188,71 @@ export default function Formulario({ tipo, f, datos, soloLectura, onGuardado }) 
           <section className="seccion-bloque">
             <h3>{f.escalaTitulo}</h3>
             <p className="ayuda">{f.escalaAyuda}</p>
-            <div className="tabla-scroll">
-              <table className="rejilla">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Consideraciones</th>
-                    {f.niveles.map((n, i) => (
-                      <th key={n}>{i + 1}<br /><small>{n}</small></th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {f.escala.map((q, i) => (
-                    <tr key={i}>
-                      <td>{i + 1}</td>
-                      <td className="pregunta">{q}</td>
-                      {f.niveles.map((_, n) => (
-                        <td key={n} className="centro">
-                          <input
-                            type="radio"
-                            name={`c${i}`}
-                            aria-label={`Pregunta ${i + 1}: ${n + 1}`}
-                            checked={d.calif?.[i] === n + 1}
-                            onChange={() => setD((x) => ({ ...x, calif: { ...x.calif, [i]: n + 1 } }))}
-                          />
-                        </td>
+              <div className="tabla-scroll escala-desktop-table">
+                <table className="rejilla">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Consideraciones</th>
+                      {f.niveles.map((n, i) => (
+                        <th key={n}>{i + 1}<br /><small>{n}</small></th>
                       ))}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {f.escala.map((q, i) => (
+                      <tr key={i}>
+                        <td>{i + 1}</td>
+                        <td className="pregunta">{q}</td>
+                        {f.niveles.map((_, n) => (
+                          <td key={n} className="centro">
+                            <input
+                              type="radio"
+                              name={`c${i}`}
+                              aria-label={`Pregunta ${i + 1}: ${n + 1}`}
+                              checked={d.calif?.[i] === n + 1}
+                              onChange={() => setD((x) => ({ ...x, calif: { ...x.calif, [i]: n + 1 } }))}
+                            />
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Tarjetas táctiles responsivas para móviles */}
+              <div className="escala-mobile-cards no-print">
+                {f.escala.map((q, i) => (
+                  <div key={i} className="escala-card">
+                    <div className="escala-card-header">
+                      <span className="escala-card-num">Pregunta {i + 1} de {f.escala.length}</span>
+                      <p className="escala-card-pregunta">{q}</p>
+                    </div>
+                    <div className="escala-opciones-grid" role="radiogroup" aria-label={`Pregunta ${i + 1}`}>
+                      {f.niveles.map((nivel, n) => {
+                        const valor = n + 1;
+                        const seleccionado = d.calif?.[i] === valor;
+                        return (
+                          <label
+                            key={nivel}
+                            className={`escala-opcion-pill ${seleccionado ? 'seleccionada' : ''}`}
+                          >
+                            <input
+                              type="radio"
+                              name={`cm${i}`}
+                              checked={seleccionado}
+                              onChange={() => setD((x) => ({ ...x, calif: { ...x.calif, [i]: valor } }))}
+                            />
+                            <span className="escala-opcion-num">{valor}</span>
+                            <span className="escala-opcion-txt">{nivel}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
           </section>
         )}
 
