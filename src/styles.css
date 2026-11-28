@@ -60,16 +60,6 @@ select:focus-visible {
 }
 
 input,
-select {
-  font: inherit;
-  width: 100%;
-  padding: .4rem .5rem;
-  border: 1px solid var(--linea);
-  border-radius: 3px;
-  background: #fff;
-}
-
-input,
 select,
 textarea {
   font: inherit;
@@ -211,21 +201,6 @@ fieldset {
 /* Contenido Principal y Hoja */
 .app-layout {
   min-height: 100vh;
-  background: var(--fondo);
-  display: flex;
-  flex-direction: column;
-}
-
-.main-content {
-  max-width: 1100px;
-  width: 100%;
-  margin: 1.2rem auto;
-  padding: 0 1rem;
-  box-sizing: border-box;
-}
-
-.app-layout {
-  min-height: 100vh;
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
@@ -342,25 +317,6 @@ fieldset {
   background: var(--papel);
   border: 1px solid var(--linea);
   padding: 1.2rem;
-}
-
-.membrete {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 1.2rem;
-}
-
-.membrete td {
-  border: 1px solid var(--linea);
-  padding: .4rem .6rem;
-  font-size: .85rem;
-  vertical-align: middle;
-}
-
-.hoja {
-  background: var(--papel);
-  border: 1px solid var(--linea);
-  padding: 1.2rem;
   width: 100%;
   max-width: 100%;
   min-width: 0;
@@ -413,21 +369,6 @@ fieldset {
 
 .campos {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: .8rem;
-  margin-bottom: 1rem;
-}
-
-.campos label,
-.acceso label {
-  display: grid;
-  gap: .2rem;
-  font-size: .85rem;
-  font-weight: 600;
-}
-
-.campos {
-  display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
   gap: .8rem;
   margin-bottom: 1rem;
@@ -458,10 +399,6 @@ h3 {
   margin: 0 0 .6rem;
   font-size: .9rem;
   max-width: 75ch;
-}
-
-.tabla-scroll {
-  overflow-x: auto;
 }
 
 .seccion-bloque {
@@ -1320,14 +1257,6 @@ h3 {
   padding: 0;
   margin: 0;
   display: grid;
-  gap: 1.4rem;
-}
-
-.formulario-fieldset {
-  border: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 1.4rem;
   min-width: 0;
@@ -1575,13 +1504,11 @@ h3 {
   }
 
   .main-content {
-    padding: 0 .4rem;
     padding: 0 .5rem;
     margin: .6rem auto;
   }
 
   .hoja {
-    padding: .9rem .7rem;
     padding: .9rem .75rem;
     border-radius: 8px;
   }
@@ -1595,20 +1522,16 @@ h3 {
   }
 
   .campos {
-    grid-template-columns: 1fr;
     grid-template-columns: minmax(0, 1fr);
     gap: .75rem;
   }
 
   .campos input,
-  .campos select {
 
-    .campos input,
     .campos select,
     .textarea-abierta {
       font-size: 16px;
       /* Evita auto-zoom en iOS Safari */
-      padding: .5rem .6rem;
       padding: .55rem .65rem;
       width: 100%;
       max-width: 100%;
@@ -1773,20 +1696,15 @@ h3 {
     }
 
     .membrete td {
-      padding: .35rem .45rem;
-      font-size: .78rem;
       padding: .3rem .4rem;
       font-size: .75rem;
     }
 
     .membrete .escudo {
-      width: 75px;
       width: 64px;
     }
 
     .membrete .escudo-img {
-      max-width: 60px;
-      max-height: 60px;
       max-width: 50px;
       max-height: 50px;
     }
